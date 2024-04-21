@@ -1,12 +1,15 @@
 const { defineConfig } = require('@vue/cli-service')
-module.exports = {
-  filenameHashing: false,
+module.exports = defineConfig({
+  transpileDependencies: true,
   chainWebpack: config => {
-    config.optimization.delete('splitChunks');
+    if (process.env.NODE_ENV === 'development') {
+      // Do not generate .map files in development
+      config.devtool('none');
+    }
   },
   configureWebpack: {
-    output: {
-      filename: '[name].js'
+    optimization: {
+      splitChunks: false
     }
   }
-};
+})
