@@ -1,10 +1,20 @@
 {
     "version": "1.0.0",
     "manifest_version": 3,
-    "name": "React Chrome Extension",
-    "description": "This is a Chrome extension built with React and TypeScript",
+    "name": "Still Human",
+    "description": "This extension will help you to grab ShareGPT links.",
+    "permissions": ["activeTab", "clipboardWrite", "notifications"],
     "action": {
-        "default_popup": "js/index.html",
-        "default_title": "React Chrome Extension"
-    }
+        "default_popup": "js/index.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://chat.openai.com/*"],
+            "js": ["contentScript.js"],
+            "run_at": "document_end"
+        }
+    ]
 }
