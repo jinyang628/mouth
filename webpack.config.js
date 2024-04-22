@@ -1,32 +1,59 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { VueLoaderPlugin } = require('vue-loader');
-
+const path = require("path");
+const HTMLPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin")
 
 module.exports = {
-  mode: 'development',
-  entry: './src/main.js', // Adjust this according to your entry file
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-  },
-  watch: true, // This enables watching files for changes and recompiling
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader']
-      },
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader'
-      },
-      // Add other loaders here
-    ]
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './public/index.html' // Adjust if your HTML file is located elsewhere
-    })
-  ]
+    entry: {
+        index: "./app/src/index.tsx"
+    },
+    mode: "production",
+    module: {
+        rules: [
+            {
+              test: /\.tsx?$/,
+               use: [
+                 {
+                  loader: "ts-loader",
+                   options: {
+                     compilerOptions: { noEmit: false },
+                    }
+                  }],
+               exclude: /node_modules/,
+            },
+            {
+              exclude: /node_modules/,
+              test: /\.css$/i,
+               use: [
+                  "style-loader",
+                  "css-loader"
+               ]
+            },
+        ],
+    },
+    plugins: [
+        new CopyPlugin({
+            patterns: [
+                { from: "manifest.json", to: "../manifest.json" },
+            ],
+        }),
+        ...getHtmlPlugins(["index"]),
+    ],
+    resolve: {
+        extensions: [".tsx", ".ts", ".js"],
+    },
+    output: {
+        path: path.join(__dirname, "dist/js"),
+        filename: "[name].js",
+    },
 };
+
+function getHtmlPlugins(chunks) {
+    return chunks.map(
+        (chunk) =>
+            new HTMLPlugin({
+                title: "React extension",
+                filename: `${chunk}.html`,
+                chunks: [chunk],
+            })
+    );
+}
