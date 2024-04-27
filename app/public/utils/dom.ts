@@ -4,6 +4,7 @@ export const clickButton = (selector: string, callback: () => void): boolean => 
     const button: Element | null = document.querySelector(selector);
     if (button instanceof HTMLElement) {
         button.click();
+        console.log("BUTTON CLICKED")
         callback();
         return true;
     }
