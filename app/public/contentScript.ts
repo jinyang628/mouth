@@ -1,46 +1,11 @@
-// Utilities for interacting with the page
-const pageUtils = {
-  clearClipboard: async () => {
-    try {
-      await navigator.clipboard.writeText(''); // Writing an empty string to clear the clipboard
-      console.log('Clipboard cleared successfully');
-    } catch (err) {
-      console.error('Failed to clear the clipboard:', err);
-    }
-  },
+import { clearClipboard } from './utils/clipboard';
+import { clickButton, setupClipboardCopy } from './utils/dom';
 
-  clickButton: (selector: string, callback: () => void): boolean => {
-    const button: Element | null = document.querySelector(selector);
-    if (button instanceof HTMLElement) {
-      button.click();
-      console.log(`${selector} button clicked`);
-      callback()
-      return true;
-    }
-    return false;
-  },
-
-  setupClipboardCopy: () => {
-    const delay = 8000; // Delay to ensure button visibility and clipboard actions
-    setTimeout(() => {
-      if (pageUtils.clickButton('.btn.relative.btn-primary', () => console.log("help"))) {
-        setTimeout(() => {
-          chrome.runtime.sendMessage({ action: 'triggerReadClipboard' });
-        }, delay);
-      }
-    }, delay);
-  }
-}
-
-
-// Main functionality to execute on page load
 const manageLinks = () => {
-  let links: string[] = []; // Store links here
-
   window.addEventListener('load', async () => {
-    await pageUtils.clearClipboard();
+    await clearClipboard();
     const intervalId = setInterval(() => {
-      if (pageUtils.clickButton('.btn.relative.btn-neutral.btn-small.flex.h-9.w-9.items-center.justify-center.whitespace-nowrap.rounded-lg', pageUtils.setupClipboardCopy)) {
+      if (clickButton('.btn.relative.btn-neutral.btn-small.flex.h-9.w-9.items-center.justify-center.whitespace-nowrap.rounded-lg', () => setupClipboardCopy(clickButton))) {
         clearInterval(intervalId);
       }
     }, 500);
