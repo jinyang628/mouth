@@ -1,5 +1,7 @@
 // App.tsx or wherever your component is defined
 import React, { useEffect } from 'react';
+import { retrieveUrls } from './scripts/start';
+import { readFromClipboard } from './scripts/clipboard';
 
 const App = () => {
   useEffect(() => {
@@ -23,29 +25,9 @@ const App = () => {
     };
   }, []);
 
-  const readFromClipboard = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      console.log('Clipboard content:', text);
-      return text;
-    } catch (error) {
-      console.error('Failed to read from clipboard:', error);
-      throw error; // to handle it in the message response
-    }
-  };
-
-  const triggerContentScript = () => {
-    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-      // Ensure there is an active tab to send a message to
-      if (tabs.length && tabs[0].id) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: "triggerManageLinks" });
-      }
-    });
-  };
-
   return (
     <div className="App">
-      <button onClick={triggerContentScript}>Retrieve URLs</button>
+      <button onClick={retrieveUrls}>Retrieve URLs</button>
     </div>
   );
 };

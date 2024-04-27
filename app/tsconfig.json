@@ -21,7 +21,7 @@
     "jsx": "react",
     "types": ["chrome"],
     "outDir": "./dist",
-    // "noImplicitAny": true,
+    "noImplicitAny": true,
     "sourceMap": true,
   },
   "include": [
