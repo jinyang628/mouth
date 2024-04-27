@@ -9,26 +9,28 @@ const pageUtils = {
     }
   },
 
-  clickButton: (selector: string, callback: () => void): boolean => {
-    const button: Element | null = document.querySelector(selector);
-    if (button instanceof HTMLElement) {
-      button.click();
-      console.log(`${selector} button clicked`);
-      callback()
-      return true;
-    }
-    return false;
+  clickButtonWhenAvailable: (selector: string, callback: () => void): void => {
+    const observer = new MutationObserver((mutations, obs) => {
+      const button: Element | null = document.querySelector(selector);
+      if (button instanceof HTMLElement) {
+        button.click();
+        console.log(`${selector} button clicked`);
+        callback();
+        obs.disconnect(); // Stop observing after the button has been clicked
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
   },
 
   setupClipboardCopy: () => {
-    const delay = 8000; // Delay to ensure button visibility and clipboard actions
-    setTimeout(() => {
-      if (pageUtils.clickButton('.btn.relative.btn-primary', () => console.log("help"))) {
-        setTimeout(() => {
-          chrome.runtime.sendMessage({ action: 'triggerReadClipboard' });
-        }, delay);
-      }
-    }, delay);
+    pageUtils.clickButtonWhenAvailable('.btn.relative.btn-primary', () => {
+      console.log("Button found and clicked, now triggering clipboard read");
+      chrome.runtime.sendMessage({ action: 'triggerReadClipboard' });
+    });
   }
 }
 
@@ -39,11 +41,7 @@ const manageLinks = () => {
 
   window.addEventListener('load', async () => {
     await pageUtils.clearClipboard();
-    const intervalId = setInterval(() => {
-      if (pageUtils.clickButton('.btn.relative.btn-neutral.btn-small.flex.h-9.w-9.items-center.justify-center.whitespace-nowrap.rounded-lg', pageUtils.setupClipboardCopy)) {
-        clearInterval(intervalId);
-      }
-    }, 500);
+    pageUtils.clickButtonWhenAvailable('.btn.relative.btn-neutral.btn-small.flex.h-9.w-9.items-center.justify-center.whitespace-nowrap.rounded-lg', pageUtils.setupClipboardCopy);
   });
 };
 
