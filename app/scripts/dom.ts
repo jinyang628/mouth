@@ -11,7 +11,7 @@ export const clickButton = (selector: string, callback: () => void): boolean => 
   };
   
 export const setupClipboardCopy = (clickButton: Function) => {
-    const delay = 8000; // Delay to ensure button visibility and clipboard actions
+    const delay = 6000; // Delay to ensure button visibility and clipboard actions
     setTimeout(() => {
         if (clickButton(COPY_LINK_BUTTON_NAME, () => console.log("Button clicked, preparing clipboard"))) {
             setTimeout(() => {
