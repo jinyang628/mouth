@@ -9,11 +9,12 @@ const pageUtils = {
     }
   },
 
-  clickButton: (selector: string): boolean => {
+  clickButton: (selector: string, callback: () => void): boolean => {
     const button: Element | null = document.querySelector(selector);
     if (button instanceof HTMLElement) {
       button.click();
       console.log(`${selector} button clicked`);
+      callback()
       return true;
     }
     return false;
@@ -22,7 +23,7 @@ const pageUtils = {
   setupClipboardCopy: () => {
     const delay = 8000; // Delay to ensure button visibility and clipboard actions
     setTimeout(() => {
-      if (pageUtils.clickButton('.btn.relative.btn-primary')) {
+      if (pageUtils.clickButton('.btn.relative.btn-primary', () => console.log("help"))) {
         setTimeout(() => {
           chrome.runtime.sendMessage({ action: 'triggerReadClipboard' });
         }, delay);
@@ -34,14 +35,13 @@ const pageUtils = {
 
 // Main functionality to execute on page load
 const manageLinks = () => {
-  let links = []; // Store links here
+  let links: string[] = []; // Store links here
 
   window.addEventListener('load', async () => {
     await pageUtils.clearClipboard();
     const intervalId = setInterval(() => {
-      if (pageUtils.clickButton('.btn.relative.btn-neutral.btn-small.flex.h-9.w-9.items-center.justify-center.whitespace-nowrap.rounded-lg')) {
+      if (pageUtils.clickButton('.btn.relative.btn-neutral.btn-small.flex.h-9.w-9.items-center.justify-center.whitespace-nowrap.rounded-lg', pageUtils.setupClipboardCopy)) {
         clearInterval(intervalId);
-        pageUtils.setupClipboardCopy();
       }
     }, 500);
   });
