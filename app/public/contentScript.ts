@@ -9,9 +9,9 @@ const pageUtils = {
     }
   },
 
-  clickButton: (selector) => {
-    const button = document.querySelector(selector);
-    if (button) {
+  clickButton: (selector: string): boolean => {
+    const button: Element | null = document.querySelector(selector);
+    if (button instanceof HTMLElement) {
       button.click();
       console.log(`${selector} button clicked`);
       return true;

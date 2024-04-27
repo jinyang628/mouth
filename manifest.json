@@ -8,12 +8,12 @@
         "default_popup": "js/index.html"
     },
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "js/background.js"
     },
     "content_scripts": [
         {
             "matches": ["https://chat.openai.com/*"],
-            "js": ["contentScript.js"],
+            "js": ["js/contentScript.js"],
             "run_at": "document_end"
         }
     ]
