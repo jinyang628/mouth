@@ -1,4 +1,4 @@
-import { clearClipboard } from "./clipboard/utils";
+import { clearClipboard } from "./clipboard";
 
 export async function retrieveUrls() {
     await clearClipboard();

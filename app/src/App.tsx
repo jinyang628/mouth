@@ -1,8 +1,7 @@
 // App.tsx
 import React, { useEffect, useState } from 'react';
-import { retrieveUrls } from './scripts/start';
-import { readFromClipboard } from './scripts/clipboard/utils';
-import ClipboardManager from './scripts/clipboard/clipboard';
+import { retrieveUrls } from '../scripts/retrieveUrls';
+import { readFromClipboard } from '../scripts/clipboard';
 
 const App = () => {
   const [url, setUrl] = useState<string>('');
@@ -32,7 +31,6 @@ const App = () => {
     <div className="App">
       <button onClick={retrieveUrls}>Retrieve URLs</button>
       {url && <p>Retrieved URL: <a href={url} target="_blank" rel="noopener noreferrer">{url}</a></p>}
-      {/* <ClipboardManager /> */}
     </div>
   );
 };
