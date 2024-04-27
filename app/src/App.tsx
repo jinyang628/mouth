@@ -1,25 +1,27 @@
-// App.tsx or wherever your component is defined
-import React, { useEffect } from 'react';
-import { retrieveUrls } from './scripts/start';
-import { readFromClipboard } from './scripts/clipboard';
+// App.tsx
+import React, { useEffect, useState } from 'react';
+import { retrieveUrls } from '../scripts/retrieveUrls';
+import { readFromClipboard } from '../scripts/clipboard';
 
 const App = () => {
+  const [url, setUrl] = useState<string>('');
+
   useEffect(() => {
-    const handleMessage = (request: { action: string; }, sender: any, sendResponse: (arg0: { clipboardContent?: string; error?: any; }) => void) => {
+    const handleMessage = async (request: { action: string }, sender: any, sendResponse: (response: { clipboardContent?: string; error?: any }) => void) => {
       if (request.action === 'readClipboard') {
-        readFromClipboard().then(text => {
+        try {
+          const text = await readFromClipboard();
+          setUrl(text);
           sendResponse({clipboardContent: text});
-        }).catch(error => {
-          console.error('Error reading clipboard:', error);
+        } catch (error: any) {
+          console.error('Error reading from clipboard:', error);
           sendResponse({error: error.message});
-        });
+        }
       }
-      return true; // to indicate that we will answer asynchronously
+      return true; // To indicate that we will answer asynchronously
     };
 
     chrome.runtime.onMessage.addListener(handleMessage);
-
-    // Cleanup listener when component unmounts
     return () => {
       chrome.runtime.onMessage.removeListener(handleMessage);
     };
@@ -28,6 +30,7 @@ const App = () => {
   return (
     <div className="App">
       <button onClick={retrieveUrls}>Retrieve URLs</button>
+      {url && <p>Retrieved URL: <a href={url} target="_blank" rel="noopener noreferrer">{url}</a></p>}
     </div>
   );
 };

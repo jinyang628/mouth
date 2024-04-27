@@ -4,7 +4,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // Forward the request to the React app's window
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         if (tabs[0].id) {
-          chrome.tabs.sendMessage(tabs[0].id, {action: "readClipboard"});
+          chrome.tabs.sendMessage(tabs[0].id, {action: "readClipboard"}, (response) => {
+            if (chrome.runtime.lastError) {
+                // Handle any errors that might have occurred
+                console.log('Error:', chrome.runtime.lastError);
+            } else {
+                console.log('Received response:', response);
+            }
+          });
         }
       });
       return true; // indicates that the response is sent asynchronously
