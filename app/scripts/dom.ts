@@ -55,3 +55,30 @@ export function setupClipboardCopy(clickButton: Function) {
         buttonClickAttemptCount++;
     }, checkInterval);
 };
+
+export function getAllChatlogLinks() {
+    const CHAT_LOG_CONTAINER_CLASS: string = 'relative mt-5 empty:mt-0 empty:hidden';
+    const INDIVIDUAL_CHAT_URL_CLASS: string = 'flex items-center gap-2 p-2';
+    const CHATGPT_URL_PREFIX: string = 'https://chat.openai.com';   
+
+    const chatlogContainers: HTMLCollectionOf<Element> = document.getElementsByClassName(CHAT_LOG_CONTAINER_CLASS);
+    const todayContainer: Element = chatlogContainers[0];
+    const ol: HTMLOListElement | null = todayContainer.getElementsByTagName('ol')[0]; // There is only one ordered list in each container
+    if (!ol) {
+        console.error("Failed to retrieve ordered list element");
+    }
+    // Iterate over all children (<li> elements) of the ordered list
+    for (let j = 0; j < ol.children.length; j++) {
+        const listItem: Element = ol.children[j];
+        const hrefElement: HTMLAnchorElement | null = listItem.getElementsByClassName(INDIVIDUAL_CHAT_URL_CLASS)[0] as HTMLAnchorElement;
+        if (!hrefElement) {
+            console.error("Failed to retrieve href element");
+        }
+        const href: string | null = hrefElement.getAttribute("href");
+        if (!href) {
+            console.error("Failed to retrieve href attribute from element");
+        }
+        const link: string = `${CHATGPT_URL_PREFIX}${href}`;
+        console.log(link);
+    }
+}
