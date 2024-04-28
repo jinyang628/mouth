@@ -4,7 +4,7 @@ const CopyPlugin = require("copy-webpack-plugin")
 
 module.exports = {
     entry: {
-        index: "./app/public/index.tsx",
+        popup: "./app/src/index.tsx",
         background: './app/src/background.ts',
         contentScript: './app/src/contentScript.ts'
     },
@@ -36,17 +36,21 @@ module.exports = {
     plugins: [
         new CopyPlugin({
             patterns: [
-                { from: "manifest.json", to: "../manifest.json" },
+                { from: "manifest.json", to: "manifest.json" },
             ],
         }),
-        ...getHtmlPlugins(["index"]),
+        new HTMLPlugin({
+            template: "app/public/popup.html", // The source template file
+            filename: "popup.html", // The output file name, same as the template
+            chunks: ["popup"], // This should correspond to an entry in webpack's entry config
+        }),
     ],
     resolve: {
         extensions: [".tsx", ".ts", ".js"],
     },
     output: {
-        path: path.join(__dirname, "dist/js"),
-        filename: "[name].js",
+        path: path.join(__dirname, "dist"),
+        filename: "js/[name].js",
     },
     optimization: {
         splitChunks: {
