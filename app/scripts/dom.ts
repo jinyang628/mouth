@@ -12,7 +12,7 @@ export function clickButton(selector: string, callback: () => void): boolean {
   
 export function setupClipboardCopy(clickButton: Function) {
     const checkInterval: number = 1000;
-    const maxAttempts: number = 100;
+    const maxAttempts: number = 500;
 
     let buttonClickAttemptCount: number = 0;
     const buttonIntervalId = setInterval(() => {
