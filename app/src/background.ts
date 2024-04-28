@@ -1,3 +1,5 @@
+import { CHATGPT_URL_PREFIX } from "../scripts/dom";
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'triggerReadClipboard') {
       // This message tells the background to ask the React app to read the clipboard
@@ -15,5 +17,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
       });
       return true; // indicates that the response is sent asynchronously
+    }
+    if (message.action === "navigate" && message.url.startsWith(CHATGPT_URL_PREFIX)) {
+      chrome.tabs.update({ url: message.url });
     }
   });
