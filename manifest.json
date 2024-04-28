@@ -3,7 +3,8 @@
     "manifest_version": 3,
     "name": "Still Human",
     "description": "This extension will help you to grab ShareGPT links.",
-    "permissions": ["activeTab", "clipboardRead", "clipboardWrite", "notifications", "scripting", "storage"],
+    "permissions": ["activeTab", "clipboardRead", "clipboardWrite", "notifications", "scripting", "storage", "tabs"],
+    "host_permissions": ["https://chat.openai.com/*"],
     "action": {
         "default_popup": "popup.html"
     },
