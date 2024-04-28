@@ -1,4 +1,3 @@
-// App.tsx
 import React, { useEffect, useState } from 'react';
 import { retrieveUrls } from '../scripts/retrieveUrls';
 import { readFromClipboard } from '../scripts/clipboard';

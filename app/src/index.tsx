@@ -2,11 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-const root = document.createElement("div")
-root.className = "container"
-document.body.appendChild(root)
-const rootDiv = ReactDOM.createRoot(root);
-rootDiv.render(
+const root = ReactDOM.createRoot(document.getElementById('root')!); // The '!' is a TypeScript non-null assertion operator
+root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
