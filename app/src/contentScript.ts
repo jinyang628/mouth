@@ -11,12 +11,11 @@ const manageLinks = async () => {
             if (chatlogLinks.length > 0) {
                 clearInterval(getAllChatlogLinksInterval);
                 console.log(chatlogLinks);
+                // for (let i = 0; i < chatlogLinks.length; i++) {
+                //     chrome.runtime.sendMessage({ action: "navigate", url: chatlogLinks[i] });
+                // }
             }
         }, 500);
-
-        // for (let i = 0; i < chatlogLinks.length; i++) {
-        //     chrome.runtime.sendMessage({ action: "navigate", url: chatlogLinks[i] });
-        // }
         
         await clearClipboard();
         const copyShareLinkInterval = setInterval(() => {
