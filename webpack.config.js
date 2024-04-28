@@ -9,7 +9,7 @@ module.exports = {
         contentScript: './app/src/contentScript.ts'
     },
     devtool: 'inline-source-map',
-    mode: "production",
+    mode: "development",
     module: {
         rules: [
             {
@@ -36,6 +36,7 @@ module.exports = {
     plugins: [
         new CopyPlugin({
             patterns: [
+                { from: "icons", to: "icons" },
                 { from: "manifest.json", to: "manifest.json" },
             ],
         }),
