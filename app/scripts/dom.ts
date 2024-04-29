@@ -1,3 +1,5 @@
+import { processTabUrl } from './navigation';
+
 export const CHATGPT_URL_PREFIX: string = 'https://chat.openai.com'; 
 
 export function clickButton(selector: string, callback: () => void): boolean {
@@ -32,11 +34,36 @@ export function setupClipboardCopy(clickButton: Function) {
             const clipboardIntervalId = setInterval(async () => {
                 try {
                     const clipboardContent = await navigator.clipboard.readText();
+
                     if (clipboardContent) {
-                        console.log("Clipboard content:", clipboardContent);
-                        clearInterval(clipboardIntervalId); // Stop checking once content is found
-                        // You can handle the clipboard content here
-                        // TODO: Pass to stomach
+
+                        clearInterval(clipboardIntervalId);
+                        // chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+                        //     // Only the current tab is active so the array has only one element
+                        //     const currentTab = tabs[0]; 
+                        //     if (currentTab.id) {
+                        //         chrome.tabs.sendMessage(currentTab.id, { action: "test", clipboardContent: clipboardContent })
+                        //     }
+                            
+
+                        //     if (currentTab && currentTab.url) {
+                        //         const originalTabId: number = processTabUrl(currentTab.url);
+                        //         // // TESTING
+                        //         // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                        //         //     const currentId: number | undefined = tabs[0].id;
+                        //         //     if (currentId) {
+                        //         //         chrome.runtime.sendMessage(currentId.toString(), { action: "test", content: clipboardContent });
+                        //         //     }
+                        //         // });
+                        //         // // TESTING
+                        //         chrome.tabs.sendMessage(originalTabId, { action: "clipboardContent", content: clipboardContent }); // Send clipboard content to background.ts of tab which initiated this navigation
+                        //     }
+                        // });
+                        // chrome.tabs.getCurrent(tab => {
+                        //     if (tab && tab.id) {
+                        //         chrome.tabs.remove(tab.id) // Close the current tab
+                        //     }
+                        // });
                     } else {
                         console.log("Clipboard is empty, retrying...");
                     }

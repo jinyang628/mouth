@@ -8,7 +8,7 @@
         "48": "icons/main.png",
         "128": "icons/main.png"
     },
-    "permissions": ["activeTab", "clipboardRead", "clipboardWrite", "notifications", "scripting", "storage", "tabs"],
+    "permissions": ["activeTab", "clipboardRead", "clipboardWrite", "notifications", "scripting", "storage", "tabs", "background"],
     "host_permissions": ["https://chat.openai.com/*"],
     "action": {
         "default_popup": "popup.html"
