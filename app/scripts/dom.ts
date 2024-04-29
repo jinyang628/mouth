@@ -14,76 +14,71 @@ export function clickButton(selector: string, callback: () => void): boolean {
   
 export function setupClipboardCopy(clickButton: Function) {
     const checkInterval: number = 1000;
-    const maxAttempts: number = 500;
+    const maxAttempts: number = 5000;
     const COPY_LINK_BUTTON_NAME: string = ".btn.relative.btn-primary";
 
-
     let buttonClickAttemptCount: number = 0;
-    const buttonIntervalId = setInterval(() => {
+    let clipboardAttemptCount: number = 0;
+
+    const attemptClipboardCopy = () => {
         if (buttonClickAttemptCount >= maxAttempts) {
             console.log("Max button click attempts reached, stopping retries.");
-            clearInterval(buttonIntervalId);
+            return; // Exit the function if max attempts are reached.
         }
 
+        // Attempt to click the copy button and read clipboard.
         if (clickButton(COPY_LINK_BUTTON_NAME, async () => {
             console.log("Button clicked, preparing to check clipboard");
-            clearInterval(buttonIntervalId); // Stop trying to click the button once clicked
 
-            // After clicking the button, start checking the clipboard
-            let clipboardAttemptCount: number = 0;
             const clipboardIntervalId = setInterval(async () => {
                 try {
                     const clipboardContent = await navigator.clipboard.readText();
-
                     if (clipboardContent) {
-
                         clearInterval(clipboardIntervalId);
-                        // chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-                        //     // Only the current tab is active so the array has only one element
-                        //     const currentTab = tabs[0]; 
-                        //     if (currentTab.id) {
-                        //         chrome.tabs.sendMessage(currentTab.id, { action: "test", clipboardContent: clipboardContent })
-                        //     }
-                            
-
-                        //     if (currentTab && currentTab.url) {
-                        //         const originalTabId: number = processTabUrl(currentTab.url);
-                        //         // // TESTING
-                        //         // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                        //         //     const currentId: number | undefined = tabs[0].id;
-                        //         //     if (currentId) {
-                        //         //         chrome.runtime.sendMessage(currentId.toString(), { action: "test", content: clipboardContent });
-                        //         //     }
-                        //         // });
-                        //         // // TESTING
-                        //         chrome.tabs.sendMessage(originalTabId, { action: "clipboardContent", content: clipboardContent }); // Send clipboard content to background.ts of tab which initiated this navigation
-                        //     }
-                        // });
-                        // chrome.tabs.getCurrent(tab => {
-                        //     if (tab && tab.id) {
-                        //         chrome.tabs.remove(tab.id) // Close the current tab
-                        //     }
-                        // });
+                        chrome.runtime.sendMessage({ action: "sendClipboardContent", content: clipboardContent }, function(response) {
+                            if (response.status === "success") {
+                                console.log("Clipboard content sent successfully");
+                            } else {
+                                console.error("Failed to send clipboard content:");
+                            }
+                        });
                     } else {
                         console.log("Clipboard is empty, retrying...");
+                        buttonClickAttemptCount++;
+                        setTimeout(() => {
+                            clearInterval(clipboardIntervalId); // Clear the current interval
+                            attemptClipboardCopy(); // Reclick the button and recheck clipboard
+                        }, checkInterval);
                     }
                 } catch (err) {
-                    console.error("Failed to read from clipboard:", err);
-                    clearInterval(clipboardIntervalId); // Stop on error as well
+                    if (err instanceof DOMException && err.name === 'NotAllowedError') {
+                        console.log("Clipboard read failed due to focus, retrying...");
+                        // Try clicking the button again
+                        buttonClickAttemptCount++;
+                        setTimeout(attemptClipboardCopy, checkInterval); // Schedule another button click
+                    } else {
+                        console.error("Failed to read from clipboard:", err);
+                        clearInterval(clipboardIntervalId);
+                        return; 
+                    }
                 }
                 if (++clipboardAttemptCount >= maxAttempts) {
-                    clearInterval(clipboardIntervalId); // Ensure the loop exits if content is not found
-                    console.log("Max clipboard attempts reached, stopping retries.");
+                    clearInterval(clipboardIntervalId);
+                    console.log("Max clipboard attempts reached, stopping clipboard retries.");
                 }
             }, checkInterval);
         })) {
             console.log("Button found and clicked");
         } else {
             console.log("Button not found or click failed, retrying...");
+            buttonClickAttemptCount++;
+            setTimeout(attemptClipboardCopy, checkInterval); // Schedule another button click attempt
         }
-        buttonClickAttemptCount++;
-    }, checkInterval);
-};
+    };
+
+    attemptClipboardCopy();
+}
+
 
 export function getAllChatlogLinks(): string[] {
     const links: string[] = [];

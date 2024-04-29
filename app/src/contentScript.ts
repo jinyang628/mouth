@@ -7,7 +7,6 @@ let linkCounter: number = 0;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'getLink') {
-        console.log("Received 'getLink' with originalTabId:", request.originalTabId);
         if (linkCounter < chatlogLinks.length) {
             chrome.runtime.sendMessage({ action: "navigateToLink", url: chatlogLinks[linkCounter], originalTabId: request.originalTabId});
             linkCounter++;
