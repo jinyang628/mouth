@@ -1,25 +1,7 @@
 import { clearClipboard } from '../scripts/clipboard';
 import { clickButton, getAllChatlogLinks, setupClipboardCopy } from '../scripts/dom';
 import { NAVIGATION_MARKER } from './background';
-
-let chatlogLinks: string[] = [];
-let linkCounter: number = 0;
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'getLink') {
-        if (linkCounter < chatlogLinks.length) {
-            chrome.runtime.sendMessage({ action: "navigateToLink", url: chatlogLinks[linkCounter], originalTabId: request.originalTabId});
-            linkCounter++;
-        }
-    } else if (request.action === 'updateShareGptLinkList') {
-        console.error("Received link:", request.link)
-        chatlogLinks.push(request.link);
-        if (linkCounter < chatlogLinks.length) {
-            chrome.runtime.sendMessage({ action: "navigateToLink", url: chatlogLinks[linkCounter], originalTabId: request.originalTabId});
-            linkCounter++;
-        }
-    }
-});
+import { PopulateChatlogLinksMessage, populateChatlogLinksMessageSchema } from './types/messages';
 
 const manageLinks = async () => {
     const SHARE_GPT_LINK_BUTTON_CLASS: string = ".btn.relative.btn-neutral.btn-small.flex.h-9.w-9.items-center.justify-center.whitespace-nowrap.rounded-lg"
@@ -34,10 +16,20 @@ const manageLinks = async () => {
             }, 500);
         } else {
             const getAllChatlogLinksInterval = setInterval(() => {
-                chatlogLinks = getAllChatlogLinks();
+                const chatlogLinks: string[] = getAllChatlogLinks();
                 if (chatlogLinks.length > 0) {
                     clearInterval(getAllChatlogLinksInterval);
-                    console.log(chatlogLinks);
+                    console.error(chatlogLinks);
+                    // const message: PopulateChatlogLinksMessage  = populateChatlogLinksMessageSchema.parse({
+                    //     action: 'populateChatlogLinks',
+                    //     links: chatlogLinks
+                    // }); 
+                    const message = {
+                        action: 'populateChatlogLinks',
+                        links: chatlogLinks
+                    }
+                    console.error(message);
+                    chrome.runtime.sendMessage(message)
                 }
             }, 500);
         }

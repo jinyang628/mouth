@@ -1,28 +1,37 @@
-import { processTabUrl } from "../scripts/navigation";
+import { Message, PopulateChatlogLinksMessage, messageSchema, populateChatlogLinksMessageSchema } from "./types/messages";
 
 export const NAVIGATION_MARKER: string = "##still-human##";
 
+let linkCounter: number = 0;
+let shareGptLinks: string[] = [];
+let chatlogLinks: string[] = [];
+
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'triggerNavigateToLinks') {
+
+    // const parsedMessage: Message = messageSchema.parse(message); 
+    // if (parsedMessage.action === "populateChatlogLinks") {
+        // const { links } = parsedMessage
+    if (message.action === "populateChatlogLinks") {
+        chatlogLinks = message.links;
+        sendResponse({"status": "Chatlog links populated."})
+    } else if (message.action === "triggerNavigateToLinks") {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (!tabs[0].id) {
           console.error("No tab ID found in query response.");
           return;
         }
-        const tabId: number = tabs[0].id;
-        chrome.storage.local.set({ tabId: tabId });
-        chrome.tabs.sendMessage(tabId, { action: "getLink", originalTabId: tabId});
+        const originalTabId: number = tabs[0].id;
+        const targetLink: string = chatlogLinks[linkCounter];
+        chrome.storage.local.set({ originalTabId: originalTabId });
+        console.error("target links: ", targetLink)
+
+        if (linkCounter < chatlogLinks.length) {
+            const appendedUrl: string = targetLink + NAVIGATION_MARKER + message.originalTabId;
+            chrome.tabs.create({ url: appendedUrl });
+        }
+        linkCounter++;
       });
-    } else if (message.action === "navigateToLink") {
-        const appendedUrl: string = message.url + NAVIGATION_MARKER + message.originalTabId;
-        chrome.storage.local.set({ originalTabId: message.originalTabId });
-        chrome.tabs.create({ url: appendedUrl }, (newTab) => {
-            chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-                if (tabId === newTab.id && changeInfo.status === "complete") {
-                    console.log("Tab loaded:", tab.url);
-                }
-            })
-        });
     } else if (message.action === "sendClipboardContent") {
         chrome.storage.local.get(['originalTabId'], function(result) {
         const originalTabId = result.originalTabId;
@@ -46,6 +55,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             });
         });
       });
+    } else if (message.action === "updateShareGptLinkList") {
+        shareGptLinks.push(message.link);
+        console.error(shareGptLinks)
+        chrome.runtime.sendMessage({ action: "triggerNavigateToLinks" });
     }
     return true; // Indicates to Chrome that sendResponse will be called asynchronously
 });
