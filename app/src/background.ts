@@ -23,44 +23,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 }
             })
         });
-    } else if (message.action === "clipboardContent") {
-
-        // THERE IS A DIFFERENCE BETWEEN chrome.tabs.sendMessage and chrome.runtime.sendMessage (ONE SENDS TO BACKGROUND AND OTHER SENDS TO CONTENT, check how to handle the flow)
-        // if (chrome.extension.getBackgroundPage() === window) {
-        //     console.log("This is the background script.");
-        //     return true;
-        // } else {
-        //     console.log("This is not the background script.");
-        //     return false;
-        // }
-
-    
-      const shareGptLink: string = message.content;
-      chrome.storage.local.get(['tabId'], function(result) {
-        if (!chrome) {
-            console.error("Chrome not found in window.");
-            sendResponse({status: "error", message: "chrome not found in window."});
-        }
-        if (!chrome.tabs) {
-            console.error("Chrome tabs not found in window.");
-            sendResponse({status: "error", message: "chrome tabs not found in window."});
-        }
-        if (result.tabId) {
-            chrome.tabs.sendMessage(result.tabId, { action: "updateShareGptLinkList", link: shareGptLink }, function(response) {
-                if (chrome.runtime.lastError) {
-                    console.error("Error sending message to tab:", chrome.runtime.lastError.message);
-                    sendResponse({status: "error", message: "chrome not found in window."});
-                } else {
-                    console.log("Message sent successfully");
-                    sendResponse({status: "success"});
-
-                }
-            });
-        } else {
-            console.error("Tab ID not found in storage:", result);
-            sendResponse({status: "error", message: "tab ID not found in storage."});
-        }
-    }); 
     } else if (message.action === "sendClipboardContent") {
         chrome.storage.local.get(['originalTabId'], function(result) {
         const originalTabId = result.originalTabId;
@@ -71,8 +33,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
         chrome.tabs.update(originalTabId, {active: true}, function(tab) {
             const messageObject = {
-                action: "clipboardContent",
-                content: message.content
+                action: "updateShareGptLinkList",
+                link: message.content
             };
             chrome.tabs.sendMessage(originalTabId, messageObject, function(response) {
                 if (chrome.runtime.lastError) {

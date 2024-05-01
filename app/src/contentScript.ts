@@ -12,13 +12,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             linkCounter++;
         }
     } else if (request.action === 'updateShareGptLinkList') {
+        console.error("Received link:", request.link)
         chatlogLinks.push(request.link);
         if (linkCounter < chatlogLinks.length) {
             chrome.runtime.sendMessage({ action: "navigateToLink", url: chatlogLinks[linkCounter], originalTabId: request.originalTabId});
             linkCounter++;
         }
-    } else if (request.action === 'test') {
-        console.log("Received clipboard content:", request.content);
     }
 });
 
