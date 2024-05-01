@@ -1,3 +1,5 @@
+import { processTabUrl } from './navigation';
+
 export const CHATGPT_URL_PREFIX: string = 'https://chat.openai.com'; 
 
 export function clickButton(selector: string, callback: () => void): boolean {
@@ -12,51 +14,71 @@ export function clickButton(selector: string, callback: () => void): boolean {
   
 export function setupClipboardCopy(clickButton: Function) {
     const checkInterval: number = 1000;
-    const maxAttempts: number = 500;
+    const maxAttempts: number = 5000;
     const COPY_LINK_BUTTON_NAME: string = ".btn.relative.btn-primary";
 
-
     let buttonClickAttemptCount: number = 0;
-    const buttonIntervalId = setInterval(() => {
+    let clipboardAttemptCount: number = 0;
+
+    const attemptClipboardCopy = () => {
         if (buttonClickAttemptCount >= maxAttempts) {
             console.log("Max button click attempts reached, stopping retries.");
-            clearInterval(buttonIntervalId);
+            return; // Exit the function if max attempts are reached.
         }
 
+        // Attempt to click the copy button and read clipboard.
         if (clickButton(COPY_LINK_BUTTON_NAME, async () => {
             console.log("Button clicked, preparing to check clipboard");
-            clearInterval(buttonIntervalId); // Stop trying to click the button once clicked
 
-            // After clicking the button, start checking the clipboard
-            let clipboardAttemptCount: number = 0;
             const clipboardIntervalId = setInterval(async () => {
                 try {
                     const clipboardContent = await navigator.clipboard.readText();
                     if (clipboardContent) {
-                        console.log("Clipboard content:", clipboardContent);
-                        clearInterval(clipboardIntervalId); // Stop checking once content is found
-                        // You can handle the clipboard content here
-                        // TODO: Pass to stomach
+                        clearInterval(clipboardIntervalId);
+                        chrome.runtime.sendMessage({ action: "sendClipboardContent", content: clipboardContent }, function(response) {
+                            if (response.status === "success") {
+                                console.log("Clipboard content sent successfully");
+                            } else {
+                                console.error("Failed to send clipboard content:");
+                            }
+                        });
                     } else {
                         console.log("Clipboard is empty, retrying...");
+                        buttonClickAttemptCount++;
+                        setTimeout(() => {
+                            clearInterval(clipboardIntervalId); // Clear the current interval
+                            attemptClipboardCopy(); // Reclick the button and recheck clipboard
+                        }, checkInterval);
                     }
                 } catch (err) {
-                    console.error("Failed to read from clipboard:", err);
-                    clearInterval(clipboardIntervalId); // Stop on error as well
+                    if (err instanceof DOMException && err.name === 'NotAllowedError') {
+                        console.log("Clipboard read failed due to focus, retrying...");
+                        // Try clicking the button again
+                        buttonClickAttemptCount++;
+                        setTimeout(attemptClipboardCopy, checkInterval); // Schedule another button click
+                    } else {
+                        console.error("Failed to read from clipboard:", err);
+                        clearInterval(clipboardIntervalId);
+                        return; 
+                    }
                 }
                 if (++clipboardAttemptCount >= maxAttempts) {
-                    clearInterval(clipboardIntervalId); // Ensure the loop exits if content is not found
-                    console.log("Max clipboard attempts reached, stopping retries.");
+                    clearInterval(clipboardIntervalId);
+                    console.log("Max clipboard attempts reached, stopping clipboard retries.");
                 }
             }, checkInterval);
         })) {
             console.log("Button found and clicked");
         } else {
             console.log("Button not found or click failed, retrying...");
+            buttonClickAttemptCount++;
+            setTimeout(attemptClipboardCopy, checkInterval); // Schedule another button click attempt
         }
-        buttonClickAttemptCount++;
-    }, checkInterval);
-};
+    };
+
+    attemptClipboardCopy();
+}
+
 
 export function getAllChatlogLinks(): string[] {
     const links: string[] = [];

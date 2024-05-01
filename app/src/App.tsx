@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { retrieveUrls } from '../scripts/retrieveUrls';
+import { navigateToLinks } from '../scripts/navigation';
 import { readFromClipboard } from '../scripts/clipboard';
 
 const App = () => {
@@ -28,7 +28,7 @@ const App = () => {
 
   return (
     <div className="App">
-      <button onClick={retrieveUrls}>Retrieve URLs</button>
+      <button onClick={navigateToLinks}>Navigate to Links</button>
       {url && <p>Retrieved URL: <a href={url} target="_blank" rel="noopener noreferrer">{url}</a></p>}
     </div>
   );
