@@ -1,17 +1,67 @@
-import { z } from 'zod';
+enum MessageAction {
+    PopulateChatlogLinks = 'populateChatlogLinks',
+    NavigateToLinks = 'navigateToLinks',
+    SendClipboardContent = 'sendClipboardContent'
+}
 
-export const populateChatlogLinksMessageSchema = z.object({
-    action: z.literal('populateChatlogLinks'),
-    links: z.array(z.string()),
-});
+abstract class Message{
+    readonly action: MessageAction;
 
-export type PopulateChatlogLinksMessage = z.infer<typeof populateChatlogLinksMessageSchema>;
+    constructor(action: MessageAction) {
+        this.action = action;
+    }
+}
 
-export const dummyMessageSchema = z.object({
-    action: z.literal('populateChatlogLinkssaaa'),
-    good: z.array(z.string()),
-});
+interface PopulateChatlogLinksMessageConfig {
+    links: string[];
+}
 
-export const messageSchema = z.union([populateChatlogLinksMessageSchema, dummyMessageSchema]);
+export class PopulateChatlogLinksMessage extends Message {
+    links: string[];
 
-export type Message = z.infer<typeof messageSchema>;
+    constructor(config: PopulateChatlogLinksMessageConfig) {
+        super(MessageAction.PopulateChatlogLinks)
+        this.links = config.links;
+    }
+
+    static validate(message: any): boolean {
+        return message !== null &&
+               typeof message === 'object' &&
+               message.action === MessageAction.PopulateChatlogLinks &&
+               Array.isArray(message.links) &&
+               message.links.every((link: string) => typeof link === 'string'); 
+    }
+}
+
+export class NavigateToLinksMessage extends Message{
+
+    constructor() {
+        super(MessageAction.NavigateToLinks);
+    }
+
+    static validate(message: any): boolean {
+        return message !== null &&
+               typeof message === 'object' &&
+               message.action === MessageAction.NavigateToLinks;
+    }
+}
+
+interface SendClipboardContentMessageConfig {
+    content: string;
+}
+
+export class SendClipboardContentMessage extends Message {
+    content: string;
+
+    constructor(config: SendClipboardContentMessageConfig) {
+        super(MessageAction.SendClipboardContent);
+        this.content = config.content;
+    }
+
+    static validate(message: any): boolean {
+        return message !== null &&
+               typeof message === 'object' &&
+               message.action === MessageAction.SendClipboardContent &&
+               typeof message.content === 'string';
+    }
+}

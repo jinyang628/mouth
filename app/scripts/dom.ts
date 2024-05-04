@@ -1,3 +1,4 @@
+import { SendClipboardContentMessage } from '../src/types/messages';
 import { processTabUrl } from './navigation';
 
 export const CHATGPT_URL_PREFIX: string = 'https://chat.openai.com'; 
@@ -35,7 +36,8 @@ export function setupClipboardCopy(clickButton: Function) {
                     const clipboardContent = await navigator.clipboard.readText();
                     if (clipboardContent) {
                         clearInterval(clipboardIntervalId);
-                        chrome.runtime.sendMessage({ action: "sendClipboardContent", content: clipboardContent }, function(response) {
+                        const message = new SendClipboardContentMessage({ content: clipboardContent });
+                        chrome.runtime.sendMessage(message, function(response) {
                             if (response.status === "success") {
                                 console.log("Clipboard content sent successfully");
                             } else {

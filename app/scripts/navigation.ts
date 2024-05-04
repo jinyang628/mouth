@@ -1,5 +1,9 @@
+import { NavigateToLinksMessage } from "../src/types/messages";
+
 export async function navigateToLinks() {
-    const response = await chrome.runtime.sendMessage({action: "triggerNavigateToLinks"});
+    const message = new NavigateToLinksMessage();
+    const response = await chrome.runtime.sendMessage(message);
+    // TODO: Deal with response (error/success) appropriately
 };
 
 export function processTabUrl(url: string): number {
