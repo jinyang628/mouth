@@ -1,5 +1,4 @@
 import { SendClipboardContentMessage } from '../src/types/messages';
-import { processTabUrl } from './navigation';
 
 export const CHATGPT_URL_PREFIX: string = 'https://chat.openai.com'; 
 
