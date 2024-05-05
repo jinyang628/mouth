@@ -53,6 +53,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.error(shareGptLinks)
         const triggerMessage = new NavigateToLinksMessage();
         chrome.runtime.sendMessage(triggerMessage);
+    } else {
+        sendResponse({status: "error", message: "Invalid message received."});
     }
     return true; // Indicates to Chrome that sendResponse will be called asynchronously
 });
