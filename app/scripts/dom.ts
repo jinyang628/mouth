@@ -14,7 +14,7 @@ export function clickButton(selector: string, callback: () => void): boolean {
   
 export function setupClipboardCopy(clickButton: Function) {
     const checkInterval: number = 1000;
-    const maxAttempts: number = 50;
+    const maxAttempts: number = 7;
     const COPY_LINK_BUTTON_NAME: string = ".btn.relative.btn-primary";
 
     let buttonClickAttemptCount: number = 0;
@@ -22,7 +22,6 @@ export function setupClipboardCopy(clickButton: Function) {
 
     const attemptClipboardCopy = () => {
         if (buttonClickAttemptCount >= maxAttempts) {
-            console.log("Max button click attempts reached, stopping retries.");
             const message = new SendClipboardContentMessage({ content: "" });
             chrome.runtime.sendMessage(message, function(response) {
                 if (response.status === "success") {

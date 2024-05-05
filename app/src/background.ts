@@ -29,7 +29,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             const originalTabId: number = tabs[0].id;
             const targetLink: string = chatlogLinks[linkCounter];
             chrome.storage.local.set({ originalTabId: originalTabId });
-
             if (linkCounter < chatlogLinks.length) {
                 const appendedUrl: string = targetLink + NAVIGATION_MARKER + message.originalTabId;
                 chrome.tabs.create({ url: appendedUrl }, (newTab) => {
