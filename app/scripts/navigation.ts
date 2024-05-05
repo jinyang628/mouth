@@ -27,3 +27,23 @@ export function processTabUrl(url: string): number {
     // Should never reach here
     return -1;
 }
+
+
+export function resetNavigationTimer(navigateTimer: number | null | undefined, lastCreatedTabId: number | undefined) {
+    if (navigateTimer) {
+        clearTimeout(navigateTimer);
+    }
+    navigateTimer = setTimeout(() => {
+        if (lastCreatedTabId != null || lastCreatedTabId != undefined) {
+            chrome.tabs.remove(lastCreatedTabId, function() {
+                if (chrome.runtime.lastError) {
+                    console.error("Error removing current tab:", chrome.runtime.lastError.message);
+                } else {
+                    console.log("Current tab removed successfully.");
+                }
+            });
+            const navigateMessage = new NavigateToLinksMessage();
+            chrome.runtime.sendMessage(navigateMessage);
+        }
+    }, 10000); 
+}

@@ -1,3 +1,4 @@
+import { resetNavigationTimer } from "../scripts/navigation";
 import { PopulateChatlogLinksMessage, NavigateToLinksMessage, SendClipboardContentMessage, UpdateShareGptLinkListMessage } from "./types/messages";
 
 export const NAVIGATION_MARKER: string = "##still-human##";
@@ -8,25 +9,6 @@ let chatlogLinks: string[] = [];
 let lastCreatedTabId: number | undefined = undefined;
 let navigateTimer: number | null | undefined  = null;
 
-function resetNavigationTimer() {
-    if (navigateTimer) {
-        clearTimeout(navigateTimer);
-    }
-    navigateTimer = setTimeout(() => {
-        if (lastCreatedTabId != null || lastCreatedTabId != undefined) {
-            chrome.tabs.remove(lastCreatedTabId, function() {
-                if (chrome.runtime.lastError) {
-                    console.error("Error removing current tab:", chrome.runtime.lastError.message);
-                } else {
-                    console.log("Current tab removed successfully.");
-                }
-            });
-            const navigateMessage = new NavigateToLinksMessage();
-            chrome.runtime.sendMessage(navigateMessage);
-        }
-    }, 10000); 
-}
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (PopulateChatlogLinksMessage.validate(message)) {
@@ -34,24 +16,31 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.error("chatlog links: ", chatlogLinks)
         sendResponse({"status": "Chatlog links populated."})
     } else if (NavigateToLinksMessage.validate(message)) {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (!tabs[0].id) {
-          console.error("No tab ID found in query response.");
-          return;
-        }
-        const originalTabId: number = tabs[0].id;
-        const targetLink: string = chatlogLinks[linkCounter];
-        chrome.storage.local.set({ originalTabId: originalTabId });
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs.length === 0) {
+                console.error("No active tabs found in the current window.");
+                return;
+            }
+            if (!tabs[0].id) {
+                console.error("No tab ID found in query response.");
+                return;
+            }
+            const originalTabId: number = tabs[0].id;
+            const targetLink: string = chatlogLinks[linkCounter];
+            chrome.storage.local.set({ originalTabId: originalTabId });
 
-        if (linkCounter < chatlogLinks.length) {
-            const appendedUrl: string = targetLink + NAVIGATION_MARKER + message.originalTabId;
-            chrome.tabs.create({ url: appendedUrl }, (newTab) => {
-                lastCreatedTabId = newTab.id;
-                resetNavigationTimer();
-            });
-        }
-        linkCounter++;
-      });
+            if (linkCounter < chatlogLinks.length) {
+                const appendedUrl: string = targetLink + NAVIGATION_MARKER + message.originalTabId;
+                chrome.tabs.create({ url: appendedUrl }, (newTab) => {
+                    lastCreatedTabId = newTab.id;
+                    resetNavigationTimer(
+                        navigateTimer=navigateTimer, 
+                        lastCreatedTabId=lastCreatedTabId
+                    );
+                });
+            }
+            linkCounter++;
+        });
     } else if (SendClipboardContentMessage.validate(message)) {
         chrome.storage.local.get(['originalTabId'], function(result) {
             const originalTabId = result.originalTabId;
