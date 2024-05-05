@@ -41,6 +41,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             chrome.tabs.sendMessage(originalTabId, updateMessage, function(response) {
                 if (chrome.runtime.lastError) {
                     console.error("Error sending message to original tab:", chrome.runtime.lastError.message);
+                    sendResponse({ status: "error" });
                 } else {
                     console.log("Message sent successfully to original tab.");
                     sendResponse({ status: "success" });
@@ -53,6 +54,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.error(shareGptLinks)
         const triggerMessage = new NavigateToLinksMessage();
         chrome.runtime.sendMessage(triggerMessage);
+        sendResponse({ status: "success" });
     } else {
         sendResponse({status: "error", message: "Invalid message received."});
     }
