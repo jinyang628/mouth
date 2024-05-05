@@ -38,8 +38,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                         lastCreatedTabId=lastCreatedTabId
                     );
                 });
+                linkCounter++;
+            } else {
+                // TODO: Make the POST request to stomach
             }
-            linkCounter++;
         });
     } else if (SendClipboardContentMessage.validate(message)) {
         chrome.storage.local.get(['originalTabId'], function(result) {
