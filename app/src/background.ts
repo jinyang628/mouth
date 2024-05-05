@@ -7,6 +7,9 @@ let shareGptLinks: string[] = [];
 let chatlogLinks: string[] = [];
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+    console.error(message)
+
     if (PopulateChatlogLinksMessage.validate(message)) {
         chatlogLinks = message.links;
         console.error("chatlog links: ", chatlogLinks)
