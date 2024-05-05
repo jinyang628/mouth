@@ -42,7 +42,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 linkCounter++;
             } else {
                 chrome.runtime.sendMessage({
-                    type: "all-links-navigated",
+                    type: "allLinksNavigated",
                     shareGptLinks: shareGptLinks // Sending all navigated links
                 });
             }
@@ -86,8 +86,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             });
         });
     } else if (UpdateShareGptLinkListMessage.validate(message)) {
-        shareGptLinks.push(message.link);
-        console.error(shareGptLinks)
+        if (message.link) {
+            shareGptLinks.push(message.link);
+            console.error(shareGptLinks)
+        }
         const navigateMessage = new NavigateToLinksMessage();
         chrome.runtime.sendMessage(navigateMessage);
         sendResponse({ status: "success" });

@@ -45,5 +45,5 @@ export function resetNavigationTimer(navigateTimer: any, lastCreatedTabId: numbe
             const navigateMessage = new NavigateToLinksMessage();
             chrome.runtime.sendMessage(navigateMessage);
         }
-    }, 10000); 
+    }, 7000); 
 }

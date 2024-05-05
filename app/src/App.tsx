@@ -7,6 +7,7 @@ const App = () => {
     useEffect(() => {
         const handleMessage = (message: any, sender: any, sendResponse: any) => {
             if (message.type === 'allLinksNavigated') {
+                console.log("Received URLs:", message.shareGptLinks)
                 setUrls(message.shareGptLinks);
                 sendResponse({status: "Received URLs"});
             }
