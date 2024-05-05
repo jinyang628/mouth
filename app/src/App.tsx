@@ -5,18 +5,16 @@ const App = () => {
     const [urls, setUrls] = useState<string[]>([]);
 
     useEffect(() => {
-        const handleMessage = (message: any, sender: any, sendResponse: any) => {
-            if (message.type === 'allLinksNavigated') {
-                console.log("Received URLs:", message.shareGptLinks)
-                setUrls(message.shareGptLinks);
-                sendResponse({status: "Received URLs"});
+        chrome.storage.local.get(['shareGptLinks'], function(result) {
+            if (result.shareGptLinks) {
+                console.log("Retrieved URLs from storage:", result.shareGptLinks);
+                setUrls(result.shareGptLinks);
             }
-        };
-
-        chrome.runtime.onMessage.addListener(handleMessage);
+        });
 
         return () => {
-            chrome.runtime.onMessage.removeListener(handleMessage);
+            // Optionally clear the storage if it's no longer needed
+            chrome.storage.local.remove(['shareGptLinks']);
         };
     }, []);
 
