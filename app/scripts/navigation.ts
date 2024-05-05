@@ -29,7 +29,7 @@ export function processTabUrl(url: string): number {
 }
 
 
-export function resetNavigationTimer(navigateTimer: number | null | undefined, lastCreatedTabId: number | undefined) {
+export function resetNavigationTimer(navigateTimer: any, lastCreatedTabId: number | undefined) {
     if (navigateTimer) {
         clearTimeout(navigateTimer);
     }

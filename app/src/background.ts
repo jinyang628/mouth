@@ -1,4 +1,5 @@
 import { resetNavigationTimer } from "../scripts/navigation";
+import { post } from "./api/entry/_post";
 import { PopulateChatlogLinksMessage, NavigateToLinksMessage, SendClipboardContentMessage, UpdateShareGptLinkListMessage } from "./types/messages";
 
 export const NAVIGATION_MARKER: string = "##still-human##";
@@ -16,7 +17,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.error("chatlog links: ", chatlogLinks)
         sendResponse({"status": "Chatlog links populated."})
     } else if (NavigateToLinksMessage.validate(message)) {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
             if (tabs.length === 0) {
                 console.error("No active tabs found in the current window.");
                 return;
@@ -40,7 +41,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 });
                 linkCounter++;
             } else {
-                // TODO: Make the POST request to stomach
+                const response = await post(shareGptLinks);
             }
         });
     } else if (SendClipboardContentMessage.validate(message)) {
