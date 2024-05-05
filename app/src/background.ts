@@ -1,6 +1,6 @@
 import { resetNavigationTimer } from "../scripts/navigation";
-import { post } from "./api/entry/_post";
 import { PopulateChatlogLinksMessage, NavigateToLinksMessage, SendClipboardContentMessage, UpdateShareGptLinkListMessage } from "./types/messages";
+
 
 export const NAVIGATION_MARKER: string = "##still-human##";
 
@@ -41,7 +41,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 });
                 linkCounter++;
             } else {
-                const response = await post(shareGptLinks);
+                chrome.runtime.sendMessage({
+                    type: "all-links-navigated",
+                    shareGptLinks: shareGptLinks // Sending all navigated links
+                });
             }
         });
     } else if (SendClipboardContentMessage.validate(message)) {
