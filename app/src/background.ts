@@ -1,4 +1,4 @@
-import { Message, PopulateChatlogLinksMessage, messageSchema, populateChatlogLinksMessageSchema } from "./types/messages";
+import { PopulateChatlogLinksMessage, NavigateToLinksMessage, SendClipboardContentMessage, UpdateShareGptLinkListMessage } from "./types/messages";
 
 export const NAVIGATION_MARKER: string = "##still-human##";
 
@@ -6,16 +6,13 @@ let linkCounter: number = 0;
 let shareGptLinks: string[] = [];
 let chatlogLinks: string[] = [];
 
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
-    // const parsedMessage: Message = messageSchema.parse(message); 
-    // if (parsedMessage.action === "populateChatlogLinks") {
-        // const { links } = parsedMessage
-    if (message.action === "populateChatlogLinks") {
+    if (PopulateChatlogLinksMessage.validate(message)) {
         chatlogLinks = message.links;
+        console.error("chatlog links: ", chatlogLinks)
         sendResponse({"status": "Chatlog links populated."})
-    } else if (message.action === "triggerNavigateToLinks") {
+    } else if (NavigateToLinksMessage.validate(message)) {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (!tabs[0].id) {
           console.error("No tab ID found in query response.");
@@ -24,7 +21,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const originalTabId: number = tabs[0].id;
         const targetLink: string = chatlogLinks[linkCounter];
         chrome.storage.local.set({ originalTabId: originalTabId });
-        console.error("target links: ", targetLink)
 
         if (linkCounter < chatlogLinks.length) {
             const appendedUrl: string = targetLink + NAVIGATION_MARKER + message.originalTabId;
@@ -32,7 +28,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
         linkCounter++;
       });
-    } else if (message.action === "sendClipboardContent") {
+    } else if (SendClipboardContentMessage.validate(message)) {
         chrome.storage.local.get(['originalTabId'], function(result) {
         const originalTabId = result.originalTabId;
         if (!originalTabId) {
@@ -41,13 +37,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             return;
         }
         chrome.tabs.update(originalTabId, {active: true}, function(tab) {
-            const messageObject = {
-                action: "updateShareGptLinkList",
-                link: message.content
-            };
-            chrome.tabs.sendMessage(originalTabId, messageObject, function(response) {
+            const updateMessage = new UpdateShareGptLinkListMessage({ link: message.content });
+            chrome.tabs.sendMessage(originalTabId, updateMessage, function(response) {
                 if (chrome.runtime.lastError) {
                     console.error("Error sending message to original tab:", chrome.runtime.lastError.message);
+                    sendResponse({ status: "error" });
                 } else {
                     console.log("Message sent successfully to original tab.");
                     sendResponse({ status: "success" });
@@ -55,10 +49,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             });
         });
       });
-    } else if (message.action === "updateShareGptLinkList") {
+    } else if (UpdateShareGptLinkListMessage.validate(message)) {
         shareGptLinks.push(message.link);
         console.error(shareGptLinks)
-        chrome.runtime.sendMessage({ action: "triggerNavigateToLinks" });
+        const triggerMessage = new NavigateToLinksMessage();
+        chrome.runtime.sendMessage(triggerMessage);
+        sendResponse({ status: "success" });
+    } else {
+        sendResponse({status: "error", message: "Invalid message received."});
     }
     return true; // Indicates to Chrome that sendResponse will be called asynchronously
 });

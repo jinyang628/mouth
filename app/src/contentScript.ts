@@ -1,7 +1,7 @@
 import { clearClipboard } from '../scripts/clipboard';
 import { clickButton, getAllChatlogLinks, setupClipboardCopy } from '../scripts/dom';
 import { NAVIGATION_MARKER } from './background';
-import { PopulateChatlogLinksMessage, populateChatlogLinksMessageSchema } from './types/messages';
+import { PopulateChatlogLinksMessage } from './types/messages';
 
 const manageLinks = async () => {
     const SHARE_GPT_LINK_BUTTON_CLASS: string = ".btn.relative.btn-neutral.btn-small.flex.h-9.w-9.items-center.justify-center.whitespace-nowrap.rounded-lg"
@@ -19,16 +19,8 @@ const manageLinks = async () => {
                 const chatlogLinks: string[] = getAllChatlogLinks();
                 if (chatlogLinks.length > 0) {
                     clearInterval(getAllChatlogLinksInterval);
-                    console.error(chatlogLinks);
-                    // const message: PopulateChatlogLinksMessage  = populateChatlogLinksMessageSchema.parse({
-                    //     action: 'populateChatlogLinks',
-                    //     links: chatlogLinks
-                    // }); 
-                    const message = {
-                        action: 'populateChatlogLinks',
-                        links: chatlogLinks
-                    }
-                    console.error(message);
+                    const message = new PopulateChatlogLinksMessage({ links: chatlogLinks });
+                    console.error("Today's links: ", chatlogLinks)
                     chrome.runtime.sendMessage(message)
                 }
             }, 500);
