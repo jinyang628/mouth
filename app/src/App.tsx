@@ -5,17 +5,22 @@ const App = () => {
     const [urls, setUrls] = useState<string[]>([]);
 
     useEffect(() => {
-        chrome.storage.local.get(['shareGptLinks'], function(result) {
-            if (result.shareGptLinks) {
-                console.log("Retrieved URLs from storage:", result.shareGptLinks);
-                setUrls(result.shareGptLinks);
-            }
-        });
+      function fetchData() {
+          chrome.storage.local.get(['shareGptLinks'], function(result) {
+              if (result.shareGptLinks) {
+                  console.log("Retrieved URLs from storage:", result.shareGptLinks);
+                  setUrls(result.shareGptLinks);
+              } else {
+                  console.log("No URLs found, retrying...");
+                  setTimeout(fetchData, 1000); // Retry after 1 second
+              }
+          });
+      }
+      fetchData();
 
-        return () => {
-            // Optionally clear the storage if it's no longer needed
-            chrome.storage.local.remove(['shareGptLinks']);
-        };
+      return () => {
+          chrome.storage.local.remove(['shareGptLinks']);
+      };
     }, []);
 
     return (

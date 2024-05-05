@@ -14,7 +14,7 @@ export function clickButton(selector: string, callback: () => void): boolean {
   
 export function setupClipboardCopy(clickButton: Function) {
     const checkInterval: number = 1000;
-    const maxAttempts: number = 7;
+    const maxAttempts: number = 3;
     const COPY_LINK_BUTTON_NAME: string = ".btn.relative.btn-primary";
 
     let buttonClickAttemptCount: number = 0;

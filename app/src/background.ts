@@ -14,10 +14,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (PopulateChatlogLinksMessage.validate(message)) {
         chatlogLinks = message.links;
-        console.error("chatlog links: ", chatlogLinks)
         sendResponse({"status": "Chatlog links populated."})
     } else if (NavigateToLinksMessage.validate(message)) {
         chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+            console.log("shareGptLinks: ", shareGptLinks)
             if (tabs.length === 0) {
                 console.error("No active tabs found in the current window.");
                 return;
@@ -39,12 +39,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     );
                 });
                 linkCounter++;
-            } else {
-                chrome.storage.local.set({ 'shareGptLinks': shareGptLinks });
-                // chrome.runtime.sendMessage({
-                //     type: "allLinksNavigated",
-                //     shareGptLinks: shareGptLinks // Sending all navigated links
-                // });
             }
         });
     } else if (SendClipboardContentMessage.validate(message)) {
@@ -88,6 +82,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } else if (UpdateShareGptLinkListMessage.validate(message)) {
         if (message.link) {
             shareGptLinks.push(message.link);
+            chrome.storage.local.set({ 'shareGptLinks': shareGptLinks });
         }
         const navigateMessage = new NavigateToLinksMessage();
         chrome.runtime.sendMessage(navigateMessage);
