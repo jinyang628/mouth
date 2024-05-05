@@ -1,7 +1,8 @@
 enum MessageAction {
     PopulateChatlogLinks = 'populateChatlogLinks',
     NavigateToLinks = 'navigateToLinks',
-    SendClipboardContent = 'sendClipboardContent'
+    SendClipboardContent = 'sendClipboardContent',
+    UpdateShareGptLinkList = 'updateShareGptLinkList'
 }
 
 abstract class Message{
@@ -63,5 +64,25 @@ export class SendClipboardContentMessage extends Message {
                typeof message === 'object' &&
                message.action === MessageAction.SendClipboardContent &&
                typeof message.content === 'string';
+    }
+}
+
+interface UpdateShareGptLinkListMessageConfig {
+    link: string;
+}
+
+export class UpdateShareGptLinkListMessage extends Message {
+    link: string;
+
+    constructor(config: UpdateShareGptLinkListMessageConfig) {
+        super(MessageAction.UpdateShareGptLinkList);
+        this.link = config.link;
+    }
+
+    static validate(message: any): boolean {
+        return message !== null &&
+               typeof message === 'object' &&
+               message.action === MessageAction.UpdateShareGptLinkList &&
+               typeof message.link === 'string';
     }
 }

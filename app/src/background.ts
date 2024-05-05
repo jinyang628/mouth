@@ -1,4 +1,4 @@
-import { PopulateChatlogLinksMessage, NavigateToLinksMessage, SendClipboardContentMessage } from "./types/messages";
+import { PopulateChatlogLinksMessage, NavigateToLinksMessage, SendClipboardContentMessage, UpdateShareGptLinkListMessage } from "./types/messages";
 
 export const NAVIGATION_MARKER: string = "##still-human##";
 
@@ -7,8 +7,6 @@ let shareGptLinks: string[] = [];
 let chatlogLinks: string[] = [];
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-
-    console.error(message)
 
     if (PopulateChatlogLinksMessage.validate(message)) {
         chatlogLinks = message.links;
@@ -39,11 +37,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             return;
         }
         chrome.tabs.update(originalTabId, {active: true}, function(tab) {
-            const messageObject = {
-                action: "updateShareGptLinkList",
-                link: message.content
-            };
-            chrome.tabs.sendMessage(originalTabId, messageObject, function(response) {
+            const updateMessage = new UpdateShareGptLinkListMessage({ link: message.content });
+            chrome.tabs.sendMessage(originalTabId, updateMessage, function(response) {
                 if (chrome.runtime.lastError) {
                     console.error("Error sending message to original tab:", chrome.runtime.lastError.message);
                 } else {
@@ -53,10 +48,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             });
         });
       });
-    } else if (message.action === "updateShareGptLinkList") {
+    } else if (UpdateShareGptLinkListMessage.validate(message)) {
         shareGptLinks.push(message.link);
         console.error(shareGptLinks)
-        chrome.runtime.sendMessage({ action: "triggerNavigateToLinks" });
+        const triggerMessage = new NavigateToLinksMessage();
+        chrome.runtime.sendMessage(triggerMessage);
     }
     return true; // Indicates to Chrome that sendResponse will be called asynchronously
 });
