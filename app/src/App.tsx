@@ -1,37 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { navigateToLinks } from '../scripts/navigation';
-import { readFromClipboard } from '../scripts/clipboard';
+import { post } from '../scripts/api/entry/_post';
+
+interface Config {
+  STOMACH_API_URL: string;
+  API_KEY: string;
+}
+
 
 const App = () => {
-  const [url, setUrl] = useState<string>('');
+    const [urls, setUrls] = useState<string[]>([]);
+    const [config, setConfig] = useState<Config | null>(null);
 
-  useEffect(() => {
-    const handleMessage = async (request: { action: string }, sender: any, sendResponse: (response: { clipboardContent?: string; error?: any }) => void) => {
-      if (request.action === 'readClipboard') {
-        try {
-          const text = await readFromClipboard();
-          setUrl(text);
-          sendResponse({clipboardContent: text});
-        } catch (error: any) {
-          console.error('Error reading from clipboard:', error);
-          sendResponse({error: error.message});
+    // Load configuration on mount
+    useEffect(() => {
+      fetch(chrome.runtime.getURL('config.json'))
+          .then((response) => response.json())
+          .then((json) => {
+              setConfig(json as Config);  // Cast the JSON to Config
+              console.log('Configuration loaded:', json);
+          })
+          .catch((error) => console.error('Error loading the configuration:', error));
+    }, []);
+
+    // Fetch data depending on configuration
+    useEffect(() => {
+        if (config) {
+          function fetchData() {
+            chrome.storage.local.get(['shareGptLinks'], function(result) {
+              if (result.shareGptLinks && result.shareGptLinks.length > 0) {
+                console.log("Retrieved URLs from storage:", result.shareGptLinks);
+                setUrls(result.shareGptLinks);
+                if (config && config.STOMACH_API_URL) { 
+                  post(result.shareGptLinks, config.STOMACH_API_URL, config.API_KEY); // Pass URL from config
+                } else {
+                  console.error("Missing STOMACH_API_URL in config");
+                }
+              } else {
+                console.log("No URLs found, retrying...");
+                setTimeout(fetchData, 1000); // Retry after 1 second
+              }
+            });
+          }
+          fetchData();
         }
-      }
-      return true; // To indicate that we will answer asynchronously
-    };
+    }, [config]);
 
-    chrome.runtime.onMessage.addListener(handleMessage);
-    return () => {
-      chrome.runtime.onMessage.removeListener(handleMessage);
-    };
-  }, []);
 
-  return (
-    <div className="App">
-      <button onClick={navigateToLinks}>Navigate to Links</button>
-      {url && <p>Retrieved URL: <a href={url} target="_blank" rel="noopener noreferrer">{url}</a></p>}
-    </div>
-  );
+    return (
+        <div className="App">
+            <button onClick={navigateToLinks}>Navigate to Links</button>
+            <ul>
+                {urls.map((url, index) => (
+                    <li key={index}><a href={url} target="_blank" rel="noopener noreferrer">{url}</a></li>
+                ))}
+            </ul>
+        </div>
+    );
 };
 
 export default App;

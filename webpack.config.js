@@ -45,6 +45,11 @@ module.exports = {
             filename: "popup.html", // The output file name, same as the template
             chunks: ["popup"], // This should correspond to an entry in webpack's entry config
         }),
+        new CopyPlugin({
+            patterns: [
+                { from: "config.json", to: "config.json"}
+            ]
+        })
     ],
     resolve: {
         extensions: [".tsx", ".ts", ".js"],

@@ -19,12 +19,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react",
-    "types": ["chrome"],
+    "types": ["chrome", "node"],
     "outDir": "./dist",
     "noImplicitAny": true,
     "sourceMap": true,
   },
   "include": [
     "src", "app/**/*.ts"
-  ]
+, "scripts/api"  ]
 }
