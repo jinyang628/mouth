@@ -1,3 +1,4 @@
 {
-    "STOMACH_API_URL": "http://0.0.0.0:8080"
+    "STOMACH_API_URL": "http://0.0.0.0:8080",
+    "API_KEY": "test_api_key_1"
 }

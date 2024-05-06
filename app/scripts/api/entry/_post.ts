@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Function to make the POST request
-export async function post(shareGptLinks: string[], STOMACH_API_URL: string) {
+export async function post(shareGptLinks: string[], STOMACH_API_URL: string, API_KEY: string) {
     try {
         console.log("Making POST request with links:", shareGptLinks)
         // TEST WITH FIRST LINK
@@ -10,9 +10,9 @@ export async function post(shareGptLinks: string[], STOMACH_API_URL: string) {
         const response = await axios.post(
             `${STOMACH_API_URL}/api/entry`, 
             {
-                api_key: "test_api_key_1",
+                api_key: API_KEY,
                 url: link,
-                tasks: ["SUMMARY"]
+                tasks: ["summary"]
             }
         );
         console.error(response)

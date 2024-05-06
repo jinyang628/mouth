@@ -4,6 +4,7 @@ import { post } from '../scripts/api/entry/_post';
 
 interface Config {
   STOMACH_API_URL: string;
+  API_KEY: string;
 }
 
 
@@ -31,7 +32,7 @@ const App = () => {
                 console.log("Retrieved URLs from storage:", result.shareGptLinks);
                 setUrls(result.shareGptLinks);
                 if (config && config.STOMACH_API_URL) { 
-                  post(result.shareGptLinks, config.STOMACH_API_URL); // Pass URL from config
+                  post(result.shareGptLinks, config.STOMACH_API_URL, config.API_KEY); // Pass URL from config
                 } else {
                   console.error("Missing STOMACH_API_URL in config");
                 }
