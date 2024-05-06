@@ -1,13 +1,11 @@
 import axios from 'axios';
+
 // Function to make the POST request
-export async function post(shareGptLinks: string[]) {
+export async function post(shareGptLinks: string[], STOMACH_API_URL: string) {
     try {
+        console.log("Making POST request with links:", shareGptLinks)
         // TEST WITH FIRST LINK
         const link: string = shareGptLinks[0];
-        const STOMACH_API_URL = process.env.STOMACH_API_URL;
-        if (!STOMACH_API_URL) {
-            throw new Error('STOMACH_API_URL is not defined');
-        }
         const response = await axios.post(
             `${STOMACH_API_URL}/api/entry`, 
             {

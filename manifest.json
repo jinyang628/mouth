@@ -10,6 +10,12 @@
     },
     "permissions": ["activeTab", "clipboardRead", "clipboardWrite", "notifications", "scripting", "storage", "tabs", "background"],
     "host_permissions": ["https://chatgpt.com/*", "http://localhost:8080/*"],
+    "web_accessible_resources": [
+        {
+            "resources": ["config.json"],
+            "matches": ["<all_urls>"]
+        }
+    ],
     "action": {
         "default_popup": "popup.html"
     },

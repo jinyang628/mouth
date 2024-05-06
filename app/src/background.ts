@@ -17,7 +17,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({"status": "Chatlog links populated."})
     } else if (NavigateToLinksMessage.validate(message)) {
         chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-            console.log("shareGptLinks: ", shareGptLinks)
             if (tabs.length === 0) {
                 console.error("No active tabs found in the current window.");
                 return;
