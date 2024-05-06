@@ -17,19 +17,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({"status": "Chatlog links populated."})
     } else if (NavigateToLinksMessage.validate(message)) {
         chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-            if (tabs.length === 0) {
-                console.error("No active tabs found in the current window.");
-                return;
-            }
             if (!tabs[0].id) {
                 console.error("No tab ID found in query response.");
                 return;
             }
             const originalTabId: number = tabs[0].id;
             const targetLink: string = chatlogLinks[linkCounter];
-            chrome.storage.local.set({ originalTabId: originalTabId });
+            chrome.storage.local.set({ "originalTabId": originalTabId });
             if (linkCounter < chatlogLinks.length) {
-                const appendedUrl: string = targetLink + NAVIGATION_MARKER + message.originalTabId;
+                const appendedUrl: string = targetLink + NAVIGATION_MARKER
                 chrome.tabs.create({ url: appendedUrl }, (newTab) => {
                     lastCreatedTabId = newTab.id;
                     resetNavigationTimer(
@@ -79,7 +75,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             });
         });
     } else if (UpdateShareGptLinkListMessage.validate(message)) {
-        if (message.link) {
+        // If there is a failure in trying to copy the link, message.link will be an empty string and we wont add it to the list
+        if (message.link) { 
             shareGptLinks.push(message.link);
             chrome.storage.local.set({ 'shareGptLinks': shareGptLinks });
         }
