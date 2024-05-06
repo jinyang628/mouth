@@ -9,6 +9,7 @@
         "128": "icons/main.png"
     },
     "permissions": ["activeTab", "clipboardRead", "clipboardWrite", "notifications", "scripting", "storage", "tabs", "background"],
+    "options_page": "options.html",
     "host_permissions": ["https://chatgpt.com/*", "http://localhost:8080/*"],
     "web_accessible_resources": [
         {
