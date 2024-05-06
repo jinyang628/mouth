@@ -6,6 +6,7 @@ export async function post(shareGptLinks: string[], STOMACH_API_URL: string) {
         console.log("Making POST request with links:", shareGptLinks)
         // TEST WITH FIRST LINK
         const link: string = shareGptLinks[0];
+        console.log(`${STOMACH_API_URL}/api/entry`)
         const response = await axios.post(
             `${STOMACH_API_URL}/api/entry`, 
             {
