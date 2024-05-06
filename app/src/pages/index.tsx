@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { navigateToLinks } from '../scripts/navigation';
-import { post } from '../scripts/api/entry/_post';
+import ReactDOM from 'react-dom/client';
+import { navigateToLinks } from '../../scripts/navigation';
+import { post } from '../../scripts/api/entry/_post';
 
 interface Config {
   STOMACH_API_URL: string;
@@ -9,8 +10,7 @@ interface Config {
 const App = () => {
     const [urls, setUrls] = useState<string[]>([]);
     const [config, setConfig] = useState<Config | null>(null);
-    const [apiKey, setApiKey] = useState('');  // State to store the API key entered by the user
-    const [inputApiKey, setInputApiKey] = useState('');  // Temporary input state for API key
+    const [apiKey, setApiKey] = useState(''); 
 
     // Load configuration on mount
     useEffect(() => {
@@ -65,4 +65,9 @@ const App = () => {
     );
 };
 
-export default App;
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

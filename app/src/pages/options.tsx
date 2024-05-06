@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 
 const Options = () => {
   const [apiKey, setApiKey] = useState('');
@@ -37,4 +37,9 @@ const Options = () => {
   );
 };
 
-ReactDOM.render(<Options />, document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+root.render(
+    <React.StrictMode>
+        <Options />
+    </React.StrictMode>
+);
