@@ -51,22 +51,8 @@ const App = () => {
         }
     }, [config, apiKey]);  // Depend on apiKey as well to re-run the effect when it changes
 
-    const handleApiKeySubmit = () => {
-        setApiKey(inputApiKey);
-        chrome.storage.local.set({apiKey: inputApiKey}, () => {
-            console.log("API key saved successfully.");
-        });
-    };
-
     return (
         <div className="App">
-            <input
-                type="text"
-                value={inputApiKey}
-                onChange={e => setInputApiKey(e.target.value)}
-                placeholder="Enter API Key"
-            />
-            <button onClick={handleApiKeySubmit}>Save API Key</button>
             <button onClick={navigateToLinks}>Navigate to Links</button>
             <ul>
                 {urls.map((url, index) => (
