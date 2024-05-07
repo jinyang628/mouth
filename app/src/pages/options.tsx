@@ -3,10 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { validate } from '../../scripts/api/user/validate';
 import { useConfig } from '../utils';
 
-interface Config {
-    STOMACH_API_URL: string;
-}
-
 function Options() {
   const [apiKey, setApiKey] = useState('');
   const config = useConfig();

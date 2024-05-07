@@ -26,7 +26,6 @@ function App() {
             alert("API Key is invalid or not set.")
           }
         }
-      
         if (config) {
           fetchData();
         }
