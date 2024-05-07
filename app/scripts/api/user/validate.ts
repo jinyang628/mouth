@@ -8,7 +8,7 @@ export async function validate(validateInput: ValidateInput): Promise<ValidateRe
 
     try {
         const response = await axios.get(
-            `${validatedInput.STOMACH_API_URL}/api/user/validate/${validatedInput.apiKey}`, 
+            `${validatedInput.STOMACH_API_URL}/api/user/validate/${validatedInput.API_KEY}`, 
         );
         console.log(response)
         const parsedResponse = validateResponseSchema.parse({

@@ -22,7 +22,7 @@ function Options() {
 
   const saveApiKey = async () => {
     try {
-      const response = await validate({ apiKey: apiKey, STOMACH_API_URL: config!.STOMACH_API_URL });
+      const response = await validate({ STOMACH_API_URL: config!.STOMACH_API_URL, API_KEY: apiKey});
       if (response.status !== 200) {
         throw new Error('Invalid API key');
       }

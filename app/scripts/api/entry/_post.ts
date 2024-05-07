@@ -9,12 +9,13 @@ export async function post(_postInput: _PostInput) {
         console.log("Making POST request with links:", validatedInput.shareGptLinks)
         // TEST WITH FIRST LINK TODO: TALK TO SHAWN AND DECIDE HOW MANY LINKS WE PASS IN/HOW TO REDIRECT USER
         const link: string = validatedInput.shareGptLinks[0];
+        
         const response = await axios.post(
             `${validatedInput.STOMACH_API_URL}/api/entry`, 
             {
                 api_key: validatedInput.API_KEY,
                 url: link,
-                tasks: ["summarise"]
+                tasks: validatedInput.tasks
             }
         );
         console.error(response)

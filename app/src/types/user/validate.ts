@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const validateInputSchema = z.object({
     STOMACH_API_URL: z.string(),
-    apiKey: z.string(),
+    API_KEY: z.string(),
 });
 
 export type ValidateInput = z.infer<typeof validateInputSchema>;

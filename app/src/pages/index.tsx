@@ -3,9 +3,13 @@ import ReactDOM from 'react-dom/client';
 import { navigateToLinks } from '../../scripts/navigation';
 import { post } from '../../scripts/api/entry/_post';
 import { useConfig } from '../utils';
+import { Task } from '../types/tasks';
 
 function App() {
     const [urls, setUrls] = useState<string[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [summariseChecked, setSummariseChecked] = useState<boolean>(false);
+    const [practiceChecked, setPracticeChecked] = useState<boolean>(false);
     const config = useConfig();
 
     useEffect(() => {
@@ -16,7 +20,13 @@ function App() {
               console.log("Retrieved URLs from storage:", result.shareGptLinks);
               setUrls(result.shareGptLinks);
               if (config && config.STOMACH_API_URL) {
-                post({ shareGptLinks: result.shareGptLinks, STOMACH_API_URL: config.STOMACH_API_URL, API_KEY: result.apiKey });
+                try {
+                    post({ STOMACH_API_URL: config.STOMACH_API_URL, API_KEY: result.apiKey, shareGptLinks: result.shareGptLinks, tasks: tasks});
+                } catch (error) {
+                    console.error('Error making POST request:', error);
+                } finally {
+                    chrome.storage.local.remove(['shareGptLinks']);
+                }
               }
             } else {
               console.log("No URLs found, retrying...");
@@ -29,8 +39,15 @@ function App() {
         if (config) {
           fetchData();
         }
-      }, [config]); // Depend on config as apiKey is checked inside fetchData now
+    }, [config]); // Depend on config as apiKey is checked inside fetchData now
       
+    useEffect(() => {
+        const selectedTasks = [];
+        if (summariseChecked) selectedTasks.push(Task.SUMMARISE);
+        if (practiceChecked) selectedTasks.push(Task.PRACTICE);
+        setTasks(selectedTasks);
+    }, [summariseChecked, practiceChecked]);
+
     return (
         <div className="App">
             <button onClick={navigateToLinks}>Navigate to Links</button>
@@ -41,6 +58,22 @@ function App() {
                     </li>
                 ))}
             </ul>
+            <div>
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={summariseChecked}
+                        onChange={(e) => setSummariseChecked(e.target.checked)}
+                    /> Summarise
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={practiceChecked}
+                        onChange={(e) => setPracticeChecked(e.target.checked)}
+                    /> Practice
+                </label>
+            </div>
         </div>
     );
 };
