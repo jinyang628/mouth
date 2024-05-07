@@ -1,15 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
+import { validate } from '../../scripts/api/user/validate';
 
-const Options = () => {
+interface Config {
+    STOMACH_API_URL: string;
+}
+
+function Options() {
   const [apiKey, setApiKey] = useState('');
+  const [config, setConfig] = useState<Config | null>(null);
 
+  // Load configuration on mount
   useEffect(() => {
-    // On mount, load the API key from storage
+    fetch(chrome.runtime.getURL('config.json'))
+        .then((response) => response.json())
+        .then((json) => {
+            setConfig(json as Config);  // Cast the JSON to Config
+            console.log('Configuration loaded:', json);
+        })
+        .catch((error) => console.error('Error loading the configuration:', error));
+
+    // Load the API key from storage
     chrome.storage.local.get(['apiKey'], function(result) {
-      if (result.apiKey) {
-        setApiKey(result.apiKey);
-      }
+        if (result.apiKey) {
+            setApiKey(result.apiKey);
+        }
     });
   }, []);
 
@@ -17,10 +32,18 @@ const Options = () => {
     setApiKey(event.target.value);
   };
 
-  const saveApiKey = () => {
-    chrome.storage.local.set({ apiKey: apiKey }, () => {
-      alert('API Key saved!');
-    });
+  const saveApiKey = async () => {
+    try {
+      const response = await validate({ apiKey: apiKey, STOMACH_API_URL: config!.STOMACH_API_URL });
+      if (response.status !== 200) {
+        throw new Error('Invalid API key');
+      }
+      chrome.storage.local.set({ apiKey: apiKey }, () => {
+        alert('API Key saved!');
+      });
+    } catch (error) {
+      alert('Invalid API Key');
+    }
   };
 
   return (
