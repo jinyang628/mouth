@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
+import { validate } from '../../scripts/api/user/validate';
+import { useConfig } from '../utils';
 
-const Options = () => {
+function Options() {
   const [apiKey, setApiKey] = useState('');
+  const config = useConfig();
 
   useEffect(() => {
-    // On mount, load the API key from storage
+    // Load the API key from storage
     chrome.storage.local.get(['apiKey'], function(result) {
-      if (result.apiKey) {
-        setApiKey(result.apiKey);
-      }
+        if (result.apiKey) {
+            setApiKey(result.apiKey);
+        }
     });
   }, []);
 
@@ -17,10 +20,18 @@ const Options = () => {
     setApiKey(event.target.value);
   };
 
-  const saveApiKey = () => {
-    chrome.storage.local.set({ apiKey: apiKey }, () => {
-      alert('API Key saved!');
-    });
+  const saveApiKey = async () => {
+    try {
+      const response = await validate({ STOMACH_API_URL: config!.STOMACH_API_URL, API_KEY: apiKey});
+      if (response.status !== 200) {
+        throw new Error('Invalid API key');
+      }
+      chrome.storage.local.set({ apiKey: apiKey }, () => {
+        alert('API Key saved!');
+      });
+    } catch (error) {
+      alert('Invalid API Key');
+    }
   };
 
   return (

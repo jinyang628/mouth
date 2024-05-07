@@ -2,54 +2,51 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { navigateToLinks } from '../../scripts/navigation';
 import { post } from '../../scripts/api/entry/_post';
+import { useConfig } from '../utils';
+import { Task } from '../types/tasks';
 
-interface Config {
-  STOMACH_API_URL: string;
-}
-
-const App = () => {
+function App() {
     const [urls, setUrls] = useState<string[]>([]);
-    const [config, setConfig] = useState<Config | null>(null);
-    const [apiKey, setApiKey] = useState(''); 
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [summariseChecked, setSummariseChecked] = useState<boolean>(false);
+    const [practiceChecked, setPracticeChecked] = useState<boolean>(false);
+    const config = useConfig();
 
-    // Load configuration on mount
     useEffect(() => {
-      fetch(chrome.runtime.getURL('config.json'))
-          .then((response) => response.json())
-          .then((json) => {
-              setConfig(json as Config);  // Cast the JSON to Config
-              console.log('Configuration loaded:', json);
-          })
-          .catch((error) => console.error('Error loading the configuration:', error));
-
-      // Load the API key from storage
-      chrome.storage.local.get(['apiKey'], function(result) {
-          if (result.apiKey) {
-              setApiKey(result.apiKey);
-          }
-      });
-    }, []);
-
-    // Fetch data depending on configuration
-    useEffect(() => {
-        if (config && apiKey) {
-            function fetchData() {
-                chrome.storage.local.get(['shareGptLinks'], function(result) {
-                    if (result.shareGptLinks && result.shareGptLinks.length > 0) {
-                        console.log("Retrieved URLs from storage:", result.shareGptLinks);
-                        setUrls(result.shareGptLinks);
-                        if (config && config.STOMACH_API_URL) {
-                            post({ shareGptLinks: result.shareGptLinks, STOMACH_API_URL: config.STOMACH_API_URL, API_KEY: apiKey });
-                        }
-                    } else {
-                        console.log("No URLs found, retrying...");
-                        setTimeout(fetchData, 1000); // Retry after 1 second
-                    }
-                });
+        async function fetchData() {
+          const result = await chrome.storage.local.get(['shareGptLinks', 'apiKey']);
+          if (result.apiKey) {      
+            if (result.shareGptLinks && result.shareGptLinks.length > 0) {
+              console.log("Retrieved URLs from storage:", result.shareGptLinks);
+              setUrls(result.shareGptLinks);
+              if (config && config.STOMACH_API_URL) {
+                try {
+                    post({ STOMACH_API_URL: config.STOMACH_API_URL, API_KEY: result.apiKey, shareGptLinks: result.shareGptLinks, tasks: tasks});
+                } catch (error) {
+                    console.error('Error making POST request:', error);
+                } finally {
+                    chrome.storage.local.remove(['shareGptLinks']);
+                }
+              }
+            } else {
+              console.log("No URLs found, retrying...");
+              setTimeout(fetchData, 1000); // Retry after 1 second
             }
-            fetchData();
+          } else {
+            alert("API Key is invalid or not set.")
+          }
         }
-    }, [config, apiKey]);  // Depend on apiKey as well to re-run the effect when it changes
+        if (config) {
+          fetchData();
+        }
+    }, [config]); // Depend on config as apiKey is checked inside fetchData now
+      
+    useEffect(() => {
+        const selectedTasks = [];
+        if (summariseChecked) selectedTasks.push(Task.SUMMARISE);
+        if (practiceChecked) selectedTasks.push(Task.PRACTICE);
+        setTasks(selectedTasks);
+    }, [summariseChecked, practiceChecked]);
 
     return (
         <div className="App">
@@ -61,6 +58,22 @@ const App = () => {
                     </li>
                 ))}
             </ul>
+            <div>
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={summariseChecked}
+                        onChange={(e) => setSummariseChecked(e.target.checked)}
+                    /> Summarise
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        checked={practiceChecked}
+                        onChange={(e) => setPracticeChecked(e.target.checked)}
+                    /> Practice
+                </label>
+            </div>
         </div>
     );
 };
