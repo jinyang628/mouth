@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { validate } from '../../scripts/api/user/validate';
+import { useConfig } from '../utils';
 
 interface Config {
     STOMACH_API_URL: string;
@@ -8,18 +9,9 @@ interface Config {
 
 function Options() {
   const [apiKey, setApiKey] = useState('');
-  const [config, setConfig] = useState<Config | null>(null);
+  const config = useConfig();
 
-  // Load configuration on mount
   useEffect(() => {
-    fetch(chrome.runtime.getURL('config.json'))
-        .then((response) => response.json())
-        .then((json) => {
-            setConfig(json as Config);  // Cast the JSON to Config
-            console.log('Configuration loaded:', json);
-        })
-        .catch((error) => console.error('Error loading the configuration:', error));
-
     // Load the API key from storage
     chrome.storage.local.get(['apiKey'], function(result) {
         if (result.apiKey) {

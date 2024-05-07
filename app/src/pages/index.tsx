@@ -2,24 +2,11 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { navigateToLinks } from '../../scripts/navigation';
 import { post } from '../../scripts/api/entry/_post';
-
-interface Config {
-  STOMACH_API_URL: string;
-}
+import { useConfig } from '../utils';
 
 function App() {
     const [urls, setUrls] = useState<string[]>([]);
-    const [config, setConfig] = useState<Config | null>(null);
-
-    useEffect(() => {
-      fetch(chrome.runtime.getURL('config.json'))
-          .then((response) => response.json())
-          .then((json) => {
-              setConfig(json as Config);  // Cast the JSON to Config
-              console.log('Configuration loaded:', json);
-          })
-          .catch((error) => console.error('Error loading the configuration:', error));
-    }, []);
+    const config = useConfig();
 
     useEffect(() => {
         async function fetchData() {
