@@ -15,6 +15,8 @@ function App() {
     useEffect(() => {
         async function fetchData() {
           const result = await chrome.storage.local.get(['shareGptLinks', 'apiKey']);
+          console.log("Retrieved data from storage:", result)
+          console.log("Retrieved API Key from storage:", result.apiKey)
           if (result.apiKey) {      
             if (result.shareGptLinks && result.shareGptLinks.length > 0) {
               console.log("Retrieved URLs from storage:", result.shareGptLinks);

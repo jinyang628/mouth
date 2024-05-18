@@ -76,6 +76,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         });
     } else if (UpdateShareGptLinkListMessage.validate(message)) {
         // If there is a failure in trying to copy the link, message.link will be an empty string and we wont add it to the list
+        console.error("ShareGPTLink", message.link)
         if (message.link) { 
             shareGptLinks.push(message.link);
             chrome.storage.local.set({ 'shareGptLinks': shareGptLinks });

@@ -4,7 +4,7 @@ import { NAVIGATION_MARKER } from './background';
 import { PopulateChatlogLinksMessage } from './types/messages';
 
 const manageLinks = async () => {
-    const SHARE_GPT_LINK_BUTTON_CLASS: string = ".btn.relative.btn-neutral.btn-small.flex.h-9.w-9.items-center.justify-center.whitespace-nowrap.rounded-lg"
+    const SHARE_GPT_LINK_BUTTON_CLASS: string = "h-10 rounded-lg px-2.5 text-token-text-secondary focus-visible:outline-0 hover:bg-token-main-surface-secondary focus-visible:bg-token-main-surface-secondary"
 
     window.addEventListener('load', async () => {
         if (window.location.href.includes(NAVIGATION_MARKER)) {

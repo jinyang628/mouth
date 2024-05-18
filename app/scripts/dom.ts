@@ -2,8 +2,8 @@ import { SendClipboardContentMessage } from '../src/types/messages';
 
 export const CHATGPT_URL_PREFIX: string = 'https://chat.openai.com'; 
 
-export function clickButton(selector: string, callback: () => void): boolean {
-    const button: Element | null = document.querySelector(selector);
+export function clickButton(className: string, callback: () => void): boolean {
+    const button: Element = document.getElementsByClassName(className)[0];
     if (button instanceof HTMLElement) {
         button.click();
         callback();
@@ -15,7 +15,7 @@ export function clickButton(selector: string, callback: () => void): boolean {
 export function setupClipboardCopy(clickButton: Function) {
     const checkInterval: number = 1000;
     const maxAttempts: number = 3;
-    const COPY_LINK_BUTTON_NAME: string = ".btn.relative.btn-primary";
+    const COPY_LINK_BUTTON_NAME: string = "btn relative btn-primary ml-4 mr-0 mt-0 rounded-xl px-4 py-3 text-base font-bold";
 
     let buttonClickAttemptCount: number = 0;
     let clipboardAttemptCount: number = 0;
