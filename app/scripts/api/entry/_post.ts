@@ -7,6 +7,7 @@ export async function post(_postInput: _PostInput) {
     const validatedInput = _postInputSchema.parse(_postInput);
     try {
         console.log("Making POST request with links:", validatedInput.shareGptLinks)
+        console.log("Tasks to be performed:", validatedInput.tasks)
         // TEST WITH FIRST LINK TODO: TALK TO SHAWN AND DECIDE HOW MANY LINKS WE PASS IN/HOW TO REDIRECT USER
         const link: string = validatedInput.shareGptLinks[0];
         
@@ -15,10 +16,11 @@ export async function post(_postInput: _PostInput) {
             {
                 api_key: validatedInput.API_KEY,
                 url: link,
-                tasks: validatedInput.tasks
+                tasks: ["summarise"]
+                // tasks: validatedInput.tasks
             }
         );
-        console.error(response)
+        console.log("POST request response:", response.data)
         return response.data;
     } catch (error) {
         throw new Error(`Error making POST request: ${error}`);

@@ -17,6 +17,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({"status": "Chatlog links populated."})
     } else if (NavigateToLinksMessage.validate(message)) {
         chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+            console.error(tabs)
             if (!tabs[0].id) {
                 console.error("No tab ID found in query response.");
                 return;

@@ -7,27 +7,31 @@ import { Task } from '../types/tasks';
 
 function App() {
     const [urls, setUrls] = useState<string[]>([]);
-    const [tasks, setTasks] = useState<Task[]>([]);
     const [summariseChecked, setSummariseChecked] = useState<boolean>(false);
     const [practiceChecked, setPracticeChecked] = useState<boolean>(false);
     const config = useConfig();
 
     useEffect(() => {
         async function fetchData() {
-          const result = await chrome.storage.local.get(['shareGptLinks', 'apiKey']);
+          const result = await chrome.storage.local.get(['shareGptLinks', 'apiKey', 'tasks']);
           console.log("Retrieved data from storage:", result)
-          console.log("Retrieved API Key from storage:", result.apiKey)
           if (result.apiKey) {      
             if (result.shareGptLinks && result.shareGptLinks.length > 0) {
+            // if (result.shareGptLinks && result.tasks && result.shareGptLinks.length > 0 && result.tasks.length > 0) {
               console.log("Retrieved URLs from storage:", result.shareGptLinks);
               setUrls(result.shareGptLinks);
               if (config && config.STOMACH_API_URL) {
                 try {
-                    post({ STOMACH_API_URL: config.STOMACH_API_URL, API_KEY: result.apiKey, shareGptLinks: result.shareGptLinks, tasks: tasks});
+                    post({ 
+                      STOMACH_API_URL: config.STOMACH_API_URL, 
+                      API_KEY: result.apiKey,
+                      shareGptLinks: result.shareGptLinks, 
+                      tasks: result.tasks
+                    });
                 } catch (error) {
                     console.error('Error making POST request:', error);
                 } finally {
-                    chrome.storage.local.remove(['shareGptLinks']);
+                    chrome.storage.local.remove(['shareGptLinks', 'tasks']);
                 }
               }
             } else {
@@ -47,7 +51,8 @@ function App() {
         const selectedTasks = [];
         if (summariseChecked) selectedTasks.push(Task.SUMMARISE);
         if (practiceChecked) selectedTasks.push(Task.PRACTICE);
-        setTasks(selectedTasks);
+        console.log("Tasks stored in chrome local storage:", selectedTasks)
+        chrome.storage.local.set({ 'tasks': selectedTasks });
     }, [summariseChecked, practiceChecked]);
 
     return (
