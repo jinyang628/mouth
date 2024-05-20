@@ -1,56 +1,35 @@
-import { resetNavigationTimer } from "../scripts/navigation";
-import { PopulateChatlogLinksMessage, NavigateToLinksMessage, SendClipboardContentMessage, UpdateShareGptLinkListMessage } from "./types/messages";
+import { SendClipboardContentMessage } from "./types/messages";
+import { fetchConfig } from "../scripts/config";
 
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
-export const NAVIGATION_MARKER: string = "##still-human##";
-
-let linkCounter: number = 0;
-let shareGptLinks: string[] = [];
-let chatlogLinks: string[] = [];
-let lastCreatedTabId: number | undefined = undefined;
-let navigateTimer: number | null | undefined  = null;
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-
-    if (PopulateChatlogLinksMessage.validate(message)) {
-        chatlogLinks = message.links;
-        sendResponse({"status": "Chatlog links populated."})
-    } else if (NavigateToLinksMessage.validate(message)) {
-        chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-            console.error(tabs)
-            if (!tabs[0].id) {
-                console.error("No tab ID found in query response.");
-                return;
-            }
-            const originalTabId: number = tabs[0].id;
-            const targetLink: string = chatlogLinks[linkCounter];
-            chrome.storage.local.set({ "originalTabId": originalTabId });
-            if (linkCounter < chatlogLinks.length) {
-                const appendedUrl: string = targetLink + NAVIGATION_MARKER
-                chrome.tabs.create({ url: appendedUrl }, (newTab) => {
-                    lastCreatedTabId = newTab.id;
-                    resetNavigationTimer(
-                        navigateTimer=navigateTimer, 
-                        lastCreatedTabId=lastCreatedTabId
-                    );
-                });
-                linkCounter++;
-            }
-        });
-    } else if (SendClipboardContentMessage.validate(message)) {
-        console.error("SendClipboardContentMessage", message.content)
-    } else if (UpdateShareGptLinkListMessage.validate(message)) {
-        // If there is a failure in trying to copy the link, message.link will be an empty string and we wont add it to the list
-        console.error("ShareGPTLink", message.link)
-        if (message.link) { 
-            shareGptLinks.push(message.link);
-            chrome.storage.local.set({ 'shareGptLinks': shareGptLinks });
+    if (SendClipboardContentMessage.validate(message)) {
+        const shareGptLink: string = message.content;
+        if (!shareGptLink) {
+            console.error("No content found in clipboard");
+            return;
         }
-        const navigateMessage = new NavigateToLinksMessage();
-        chrome.runtime.sendMessage(navigateMessage);
-        sendResponse({ status: "success" });
-    } else {
-        sendResponse({status: "error", message: "Invalid message received."});
-    }
-    return true; // Indicates to Chrome that sendResponse will be called asynchronously
+        const config = await fetchConfig();
+        if (!config) {
+            console.error('Config not found');
+            return;
+        }
+        console.log("Sending POST request to stomach with link:", shareGptLink);
+        console.log("Config:", config);
+        fetch(`${config.STOMACH_API_URL}/api/entry`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                api_key: config.API_KEY,
+                url: shareGptLink,
+                tasks: ["summarise"]
+            })
+        }).then(response => {
+            console.log(response);
+        }).catch(error => {
+            console.error('Error making POST request:', error);
+        });
+    } 
 });

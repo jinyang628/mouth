@@ -27,6 +27,7 @@ export function setupClipboardCopy(clickButton: Function) {
     const checkInterval: number = 1000;
     const maxAttempts: number = 3;
     const COPY_LINK_BUTTON_NAME: string = "btn relative btn-primary ml-4 mr-0 mt-0 rounded-xl px-4 py-3 text-base font-bold";
+    const CLOSE_COPY_LINK_POPUP_BUTTON_NAME: string = "text-token-text-tertiary hover:text-token-text-secondary";
 
     let buttonClickAttemptCount: number = 0;
     let clipboardAttemptCount: number = 0;
@@ -53,14 +54,20 @@ export function setupClipboardCopy(clickButton: Function) {
                     const clipboardContent = await navigator.clipboard.readText();
                     if (clipboardContent) {
                         clearInterval(clipboardIntervalId);
-                        const message = new SendClipboardContentMessage({ content: clipboardContent });
-                        chrome.runtime.sendMessage(message, function(response) {
-                            if (response.status === "success") {
-                                console.log("Clipboard content sent successfully");
-                            } else {
-                                console.error("Failed to send clipboard content:");
-                            }
-                        });
+                        if (clickButton(CLOSE_COPY_LINK_POPUP_BUTTON_NAME, () => {
+                            const message = new SendClipboardContentMessage({ content: clipboardContent });
+                            chrome.runtime.sendMessage(message, function(response) {
+                                if (response.status === "success") {
+                                    console.log("Clipboard content sent successfully");
+                                } else {
+                                    console.error("Failed to send clipboard content:");
+                                }
+                            });
+                        })) {
+                            console.log("Close button found and clicked");
+                        } else {
+                            console.error("Close button not found or click failed");
+                        }
                     } else {
                         console.log("Clipboard is empty, retrying...");
                         buttonClickAttemptCount++;

@@ -6,18 +6,13 @@ export async function post(_postInput: _PostInput) {
 
     const validatedInput = _postInputSchema.parse(_postInput);
     try {
-        console.log("Making POST request with links:", validatedInput.shareGptLinks)
-        console.log("Tasks to be performed:", validatedInput.tasks)
-        // TEST WITH FIRST LINK TODO: TALK TO SHAWN AND DECIDE HOW MANY LINKS WE PASS IN/HOW TO REDIRECT USER
-        const link: string = validatedInput.shareGptLinks[0];
-        
+        console.log("Making POST request with link:", validatedInput.shareGptLink)
         const response = await axios.post(
             `${validatedInput.STOMACH_API_URL}/api/entry`, 
             {
                 api_key: validatedInput.API_KEY,
-                url: link,
+                url: validatedInput.shareGptLink,
                 tasks: ["summarise"]
-                // tasks: validatedInput.tasks
             }
         );
         console.log("POST request response:", response.data)

@@ -5,7 +5,7 @@ enum MessageAction {
     UpdateShareGptLinkList = 'updateShareGptLinkList'
 }
 
-abstract class Message{
+export abstract class Message{
     readonly action: MessageAction;
 
     constructor(action: MessageAction) {
