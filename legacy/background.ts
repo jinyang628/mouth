@@ -38,7 +38,43 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             }
         });
     } else if (SendClipboardContentMessage.validate(message)) {
-        console.error("SendClipboardContentMessage", message.content)
+        chrome.storage.local.get(['originalTabId'], function(result) {
+            const originalTabId = result.originalTabId;
+            if (!originalTabId) {
+                console.error("Original tab ID not found in storage:", result);
+                sendResponse({status: "error"});
+                return;
+            }
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                if (!tabs[0].id) {
+                    console.error("No tab ID found in current tab");
+                    return;
+                }
+            
+                const currentTabId: number = tabs[0].id;
+            
+                chrome.tabs.update(originalTabId, {active: true}, function() {
+                    const updateMessage = new UpdateShareGptLinkListMessage({ link: message.content });
+                    chrome.tabs.sendMessage(originalTabId, updateMessage, function(response) {
+                        if (chrome.runtime.lastError) {
+                            console.error("Error sending message to original tab:", chrome.runtime.lastError.message);
+                            sendResponse({ status: "error" });
+                        } else {
+                            console.log("Message sent successfully to original tab.");
+                            sendResponse({ status: "success" });
+                        }
+                        // Use the captured currentTabId to ensure the correct tab is removed
+                        chrome.tabs.remove(currentTabId, function() {
+                            if (chrome.runtime.lastError) {
+                                console.error("Error removing current tab:", chrome.runtime.lastError.message);
+                            } else {
+                                console.log("Current tab removed successfully.");
+                            }
+                        });
+                    });
+                });
+            });
+        });
     } else if (UpdateShareGptLinkListMessage.validate(message)) {
         // If there is a failure in trying to copy the link, message.link will be an empty string and we wont add it to the list
         console.error("ShareGPTLink", message.link)

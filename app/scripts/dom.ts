@@ -1,6 +1,17 @@
 import { SendClipboardContentMessage } from '../src/types/messages';
+import { clearClipboard } from './clipboard';
 
 export const CHATGPT_URL_PREFIX: string = 'https://chat.openai.com'; 
+
+export async function start() {
+    const SHARE_GPT_LINK_BUTTON_CLASS: string = "h-10 rounded-lg px-2.5 text-token-text-secondary focus-visible:outline-0 hover:bg-token-main-surface-secondary focus-visible:bg-token-main-surface-secondary"
+    await clearClipboard();
+    const copyShareLinkInterval = setInterval(() => {
+        if (clickButton(SHARE_GPT_LINK_BUTTON_CLASS, () => setupClipboardCopy(clickButton))) {
+            clearInterval(copyShareLinkInterval);
+        }
+    }, 500);
+}
 
 export function clickButton(className: string, callback: () => void): boolean {
     const button: Element = document.getElementsByClassName(className)[0];

@@ -13,7 +13,7 @@
     "host_permissions": ["https://chatgpt.com/*", "http://localhost:8080/*"],
     "web_accessible_resources": [
         {
-            "resources": ["config.json"],
+            "resources": ["config.json", "icons/main.png"],
             "matches": ["<all_urls>"]
         }
     ],

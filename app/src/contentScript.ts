@@ -1,31 +1,22 @@
-import { clearClipboard } from '../scripts/clipboard';
-import { clickButton, getAllChatlogLinks, setupClipboardCopy } from '../scripts/dom';
-import { NAVIGATION_MARKER } from './background';
-import { PopulateChatlogLinksMessage } from './types/messages';
+import { start } from '../scripts/dom';
 
-const manageLinks = async () => {
-    const SHARE_GPT_LINK_BUTTON_CLASS: string = "h-10 rounded-lg px-2.5 text-token-text-secondary focus-visible:outline-0 hover:bg-token-main-surface-secondary focus-visible:bg-token-main-surface-secondary"
+window.addEventListener('load', async () => {    
+    // Example: Add a new button to the UI
+    const stillHumanButton = document.createElement('button');
+    stillHumanButton.style.position = "fixed";
+    stillHumanButton.style.top = "12px";
+    stillHumanButton.style.right = "122px";
+    stillHumanButton.style.width = "32px"; 
+    stillHumanButton.style.height = "32px";
+    // Use chrome.runtime.getURL to get the correct path
+    const imagePath = chrome.runtime.getURL('icons/main.png');
+    stillHumanButton.style.backgroundImage = `url('${imagePath}')`;
+    stillHumanButton.style.backgroundSize = "cover";
+    document.body.appendChild(stillHumanButton);
 
-    window.addEventListener('load', async () => {
-        if (window.location.href.includes(NAVIGATION_MARKER)) {
-            await clearClipboard();
-            const copyShareLinkInterval = setInterval(() => {
-                if (clickButton(SHARE_GPT_LINK_BUTTON_CLASS, () => setupClipboardCopy(clickButton))) {
-                    clearInterval(copyShareLinkInterval);
-                }
-            }, 500);
-        } else {
-            const getAllChatlogLinksInterval = setInterval(() => {
-                const chatlogLinks: string[] = getAllChatlogLinks();
-                if (chatlogLinks.length > 0) {
-                    clearInterval(getAllChatlogLinksInterval);
-                    const message = new PopulateChatlogLinksMessage({ links: chatlogLinks });
-                    console.error("Today's links: ", chatlogLinks)
-                    chrome.runtime.sendMessage(message)
-                }
-            }, 500);
-        }
+    stillHumanButton.addEventListener('click', async () => {
+        await start();
     });
-};
+});
+  
 
-manageLinks();
